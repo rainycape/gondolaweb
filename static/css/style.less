@@ -1,0 +1,60 @@
+@barcolor: #333;
+@translucentBarcolor: fade(@barcolor, 90%);
+
+a, h1, h2, h3, h4, h5, h6 {
+    font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Helvetica, Arial, sans-serif;    
+}
+
+.navbar-inverse {
+    background: @barcolor;
+    background: @translucentBarcolor;
+}
+
+.navbar-inverse .navbar-nav > .active > {
+    a, a:hover, a:focus {
+        background: darken(@barcolor, 8%);
+        background: darken(@translucentBarcolor, 8%);
+    }
+}
+
+.image-overlay(@color, @alpha, @image) {
+        @startColor: fade(@color, @alpha);
+        @endColor: @startColor;
+        background: @color;
+        background: @startColor;
+        background: -moz-linear-gradient(top, @startColor, @endColor), @image; // FF 3.6+
+        background: -webkit-gradient(linear, 0 0, 0 100%, from(@startColor), to(@endColor)), @image; // Safari 4+, Chrome 2+
+        background: -webkit-linear-gradient(top, @startColor, @endColor), @image; // Safari 5.1+, Chrome 10+
+        background: -o-linear-gradient(top, @startColor, @endColor), @image; // Opera 11.10
+        background: linear-gradient(to bottom, @startColor, @endColor), @image; // Standard, IE10
+}
+
+@jumbo: #0f4e67;
+
+.jumbotron {
+    background: @jumbo url(../img/bg.png) 0 0 repeat;
+    color: #eee;
+}
+
+.marketing-holder {
+    margin-top: 30px;    
+
+    p {
+        font-size: 24px;
+        margin: 15px 0;
+    }
+}
+
+
+.logo-holder {
+    text-align: right;
+}
+
+#logo {
+    margin: 30px 0 30px 30px;
+    display: inline-block;
+    background: url(../img/gondola.png) 0 0 no-repeat;
+    background-size: 300px 300px;
+    width: 300px;
+    height: 300px;
+}
