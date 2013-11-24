@@ -1,0 +1,127 @@
+{{/*
+  extends: header.html
+*/}}
+
+{{ define "heading" }}
+  {{ $lower := to_lower . }}
+  <h2 id="pkg-{{ $lower }}">{{ . }} <a class="doc-anchor" href="#pkg-{{ $lower }}"><i class="fa fa-link"></i></a></h2>
+{{ end }}
+
+{{ define "values" }}
+  {{ $p := .Package }}
+  {{ range .Values }}
+    <pre class="doc">{{ $p.HTMLDecl .Decl }}</pre>
+    {{ $p.HTML .Doc }}</p>
+  {{ end }}
+{{ end }}
+
+{{ define "funcs" }}
+  {{ $p := .Package }}
+  {{ range .Funcs }}
+    <h4>{{ .Name }}</h4>
+    <pre class="doc">{{ $p.HTMLDecl .Decl }}</pre>
+    {{ $p.HTML .Doc }}</p>
+  {{ end }}
+{{ end }}
+
+
+{{ define "content" }}
+{{ with .Package }}
+  {{ $package := . }}
+  <div class="container">
+    {{ with .ImportPath }}<p class="import">import "{{ . }}"</p>{{ end }}
+    {{ $doc := .Doc }}
+    {{ with .Synopsis }}
+      <h2>Overview</h2>
+      <div class="synopsis">
+        {{ . }}
+      </div>
+    {{ end }}
+    {{ if .ImportPath }}<h2>Index</h2>{{ end }}
+    <ul class="list-unstyled">
+      {{ if .HasDoc }}
+        <li><a href="#pkg-documentation">Documentation</a></li>
+      {{ end }}
+      {{ with $doc }}
+        {{ with .Consts }}
+          <li><a href="#pkg-constants">Constants</a></li>
+        {{ end }}
+        {{ with .Vars }}
+          <li><a href="#pkg-variables">Variables</a></li>
+        {{ end }}
+      {{ end }}
+    </ul>
+    {{ with $doc }}
+      {{ with .Types }}
+        <h3>Types</h3>
+        <ul class="list-unstyled">
+          {{ range . }}
+            <li><a href="#type-{{ .Name }}">{{ .Name }}</a></li>
+          {{ end }}
+        </ul>
+      {{ end }}
+      {{ with .Funcs }}
+        <h3>Functions</h3>
+        <ul class="list-unstyled">
+          {{ range . }}
+            <li><a href="#func-{{ .Name }}">{{ .Name }}</a></li>
+          {{ end }}
+        </ul>
+      {{ end }}
+    {{ end }}
+    {{ with .Packages }}
+      <h3>Subpackages</h3>
+      <table class="table table-striped">
+        <tbody>
+          {{ range . }}
+            {{ $p := .ImportPath }}
+            <tr><td><a href="{{ reverse "doc" $p }}">{{ $p }}</a></td><td>{{ .Synopsis }}</td></tr>
+          {{ end }}
+      </table>
+    {{ end }}
+    {{ if .Filenames }}
+      <h3>Files</h3>
+        <ul class="list-inline list-unstyled">
+          {{ $p := .ImportPath }}
+          {{ range .Filenames }}
+            <li><a href="{{ reverse "source" (concat $p "/" .) }}">{{ . }}</a></li>
+          {{ end }}
+        </ul>
+    {{ end }}
+    {{ if .HasDoc }}
+      {{ template "heading" "Documentation" }}
+      {{ .HTMLDoc }}
+    {{ end }}
+    {{ with $doc }}
+      {{ with .Consts }}
+        {{ template "heading" "Constants" }}
+        {{ template "values" map "Package" $package "Values" . }}
+      {{ end }}
+      {{ with .Vars }}
+        {{ template "heading" "Variables" }}
+        {{ template "values" map "Package" $package "Values" . }}
+      {{ end }}
+      {{ with .Types }}
+        {{ template "heading" "Types" }}
+        {{ range . }}
+          <h3 id="type-{{ .Name }}">type {{ .Name }}</h3>
+          <pre class="doc">{{ $package.HTMLDecl .Decl }}</pre>
+          {{ $package.HTML .Doc }}
+          {{ template "values" map "Package" $package "Values" .Consts }}
+          {{ template "values" map "Package" $package "Values" .Vars }}
+          {{ template "funcs" map "Package" $package "Funcs" .Funcs }}
+          {{ template "funcs" map "Package" $package "Funcs" .Methods }}
+        {{ end }}
+      {{ end }}
+      {{ with .Funcs }}
+        {{ template "heading" "Functions" }}
+        {{ range . }}
+          <h3 id="func-{{ .Name }}">func {{ .Name }}</h3>
+          <pre class="doc">{{ $package.HTMLDecl .Decl }}</pre>
+          {{ $package.HTML .Doc }}
+        {{ end }}
+      {{ end }}
+    {{ end }}
+  </div>
+{{ end }}
+{{ end }}

@@ -1,0 +1,23 @@
+{{/*
+  extends: header.html
+*/}}
+
+{{ define "package" }}
+  {{ $p := .ImportPath }}
+  <tr><td><a href="{{ reverse "doc" $p }}">{{ $p }}</a></td><td>{{ .Synopsis }}</td></tr>
+  {{ range .Packages }}
+      {{ template "package" . }}
+  {{ end }}
+{{ end }}
+
+{{ define "content" }}
+<div class="container">
+  <table class="table table-striped">
+    <tbody>
+      {{ range .Packages }}
+        {{ template "package" . }}
+      {{ end }}
+    </tbody>
+  </table>
+</div>
+{{ end }}

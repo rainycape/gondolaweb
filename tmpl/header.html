@@ -1,0 +1,22 @@
+{{/*
+  extends: base.html
+*/}}
+{{ define "main" }}
+<div class="jumbotron header">
+  <div class="container">
+    <div class="logo-holder">
+      <div id="header-logo"></div>
+    </div>
+    <h1>{{ .HeaderTitle }}</h1>
+    {{ with .Breadcrumbs }}
+      {{ $last := add (len .) -1 }}
+      <ol class="breadcrumb">
+        {{ range $ii, $v := . }}
+        <li{{ if eq $ii $last }} class="active"{{ end }}><a href="{{ $v.Href }}">{{ $v.Title }}</a></li>
+        {{ end }}
+      </ol> 
+    {{ end }}
+  </div>
+</div>
+{{ template "content" . }}
+{{ end }}

@@ -5,12 +5,12 @@
     <!-- Main jumbotron for a primary marketing message or call to action -->
     <div class="jumbotron">
       <div class="container">
-        <div class="marketing-holder col-md-6">
+        <div class="marketing-holder col-sm-6">
           <h1>Gondola</h1>
           <p>The web framework for writing faster sites, faster</p>
-          <p><a class="btn btn-primary btn-lg" role="button">Learn more &raquo;</a></p>
+          <p><a href="{{ reverse "tutorial" "install" }}" class="btn btn-primary btn-lg" role="button">Get Started &raquo;</a></p>
         </div>
-        <div class="logo-holder col-md-6">
+        <div class="hidden-xs logo-holder col-sm-6">
           <div id="logo">
           </div>
         </div>
@@ -21,19 +21,21 @@
       <!-- Example row of columns -->
       <div class="row">
         <div class="col-md-4">
-          <h2>Batteries included</h2>
+          <h2><i class="fa fa-briefcase"></i> Batteries included</h2>
           <p>
-            Gondola includes an <strong>ORM</strong>, <strong>inheritance based templates</strong>,
-            an <strong>asset pipeline</strong>, a complete <strong>translation and localization</strong> system,
+            Gondola includes an <strong>ORM</strong>, a pluggable <strong>caching</strong> system,
+            with several backends, 
+            <strong>inheritance based templates</strong>, an <strong>asset pipeline</strong>, a complete
+            <strong>translation and localization</strong> system,
             as well of a lot of utilities and shorthands, so you can write sites faster than with any other
             web framework.
           </p>
           <p><a class="btn btn-default" href="#" role="button">View details &raquo;</a></p>
         </div>
         <div class="col-md-4">
-          <h2>Lightning fast</h2>
+          <h2><i class="fa fa-tachometer"></i> Lightning fast</h2>
           <p>
-            Gondola is built on top of the Go language, which provides great performance
+            Gondola is built on top of Go, which provides great performance
             while still boosting development speed with its great support for concurrency and
             garbage collection. Some parts of Gondola are written in ASM and others use even JIT
             compilation, to make it as fast as possible.
@@ -41,11 +43,11 @@
           <p><a class="btn btn-default" href="#" role="button">View details &raquo;</a></p>
        </div>
         <div class="col-md-4">
-          <h2>Cloud enabled</h2>
+          <h2><i class="fa fa-cloud"></i> Cloud enabled</h2>
           <p>
             Gondola applications can be deployed to your own servers, Google App Engine, AWS, Heroku,
-            Digital Ocean and virtually any VPS provider without changing a single line of code. Gondola
-            abstracts all the boring details for you.
+            Digital Ocean and any VPS provider without changing a single line of code. Gondola
+            abstracts all the underlying details for you.
           </p>
           <p><a class="btn btn-default" href="#" role="button">View details &raquo;</a></p>
         </div>

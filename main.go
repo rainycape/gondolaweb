@@ -17,13 +17,24 @@ var Config struct {
 	config.Config
 }
 
+type Breadcrumb struct {
+	Title string
+	Href  string
+}
+
 func main() {
 	config.MustParse(&Config)
 	m := mux.New()
+	m.HandleFunc("^/$", mux.TemplateHandler("main.html", util.M{"Section": "home"}))
+	m.HandleNamedFunc("^/tutorials/$", "tutorials", nil)
+	m.HandleNamedFunc("^/tutorial/([\\w\\-]+)/$", "tutorial", nil)
+	m.HandleFunc("^/article/$", mux.TemplateHandler("article.html", util.M{"Section": "docs"}))
+	m.HandleNamedFunc("^/doc/src/(.+)", "source", SourceHandler)
+	m.HandleNamedFunc("^/doc/pkg/$", "doc-list", DocListHandler)
+	m.HandleNamedFunc("^/doc/pkg/(.+)", "doc", DocHandler)
+	m.SetTrustXHeaders(true)
+	m.HandleAssets("/static/", STATIC_FILES_PATH)
 	if !admin.Perform(m) {
-		m.HandleFunc("^/$", mux.TemplateHandler("main.html", util.M{"Section": "home"}))
-		m.SetTrustXHeaders(true)
-		m.HandleAssets("/static/", STATIC_FILES_PATH)
 		m.MustListenAndServe()
 	}
 }

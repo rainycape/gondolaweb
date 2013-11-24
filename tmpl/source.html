@@ -1,0 +1,11 @@
+{{/*
+    extends: header.html
+    styles: css/shThemeDefault.css
+    scripts: js/xregexp.js, js/shCore.js, js/shBrushGo.js, js/highlight.js
+*/}}
+{{ define "content" }}
+<div class="container source-code">
+  <!-- TODO: Highight sh, C and ASM properly -->
+  <pre class="brush: go">{{ .Code }}</pre>
+</div>
+{{ end }}

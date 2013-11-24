@@ -17,6 +17,14 @@ a, h1, h2, h3, h4, h5, h6 {
     }
 }
 
+.navbar-inverse .navbar-nav .dropdown-menu > li > a {
+    color: #333;
+    background: transparent;
+    &:hover {
+        background: #f5f5f5;
+    }
+} 
+
 .image-overlay(@color, @alpha, @image) {
         @startColor: fade(@color, @alpha);
         @endColor: @startColor;
@@ -36,6 +44,27 @@ a, h1, h2, h3, h4, h5, h6 {
     color: #eee;
 }
 
+.header {
+    min-height: 85px;
+    padding-bottom: 10px;
+    margin-bottom: 30px;
+
+    h1 {
+        font-size: 40px;
+    }
+    .breadcrumb {
+        padding: 0;
+        margin: 0;
+        font-size: 18px;
+        background: transparent;
+        color: #fff;
+
+        a {
+            color: #fff;
+        }
+    }
+}
+
 .marketing-holder {
     margin-top: 30px;    
 
@@ -48,6 +77,7 @@ a, h1, h2, h3, h4, h5, h6 {
 
 .logo-holder {
     text-align: right;
+    position: relative;
 }
 
 #logo {
@@ -57,4 +87,77 @@ a, h1, h2, h3, h4, h5, h6 {
     background-size: 300px 300px;
     width: 300px;
     height: 300px;
+}
+
+#header-logo {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    background: url(../img/gondola_60.png) 0 0 no-repeat;
+    background-size: 60px 60px;
+    width: 60px;
+    height: 60px;
+}
+
+/* Source code formatting */
+.syntaxhighlighter {
+    display: block;
+    margin: 0 0 10px;
+    font-size: 13px;
+    line-height: 1.428571429;
+    background-color: #f5f5f5;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 4px 4px 4px 0;
+
+    code {
+        border-radius: 0;
+        background-color: transparent;
+    }
+
+    td {
+        vertical-align: top;
+    }
+
+    .gutter {
+        .line {
+            padding-left: 5px;
+            padding-right: 5px;
+
+            a {
+                font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+
+                &:active, &:focus {
+                    outline: 0;
+                }
+            }
+        }
+    }
+
+    .container {
+        padding: 0;
+        width: auto;
+    }
+}
+
+/* Package documentation */
+.import {
+    font-family: Monaco, Menlo, Consolas, 'Courier New', monospace;
+}
+
+.doc-anchor {
+    display: none;
+    font-size: 18px;
+}
+
+h1, h2, h3, h4, h5, h5 {
+    &:hover {
+        .doc-anchor {
+            display: inline;
+        }
+    }
+}
+
+.doc .comments {
+    color: darken(#5cb85c, 15%);
 }
