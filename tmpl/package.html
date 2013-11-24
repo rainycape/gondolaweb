@@ -18,7 +18,11 @@
 {{ define "funcs" }}
   {{ $p := .Package }}
   {{ range .Funcs }}
-  <h4>func {{ with.Recv }}({{ . }}) {{ end }}{{ .Name }} <a class="doc-anchor" href="{{ reverse "source" ($p.Position .Decl) }}"><i class="fa fa-external-link"></i></a></h4>
+    {{ $id := func_id . }}
+    <h4 id="{{ $id }}">func {{ with .Recv }}({{ . }}) {{ end }}{{ .Name }}
+      <a class="doc-anchor" href="#{{ $id }}"><i class="fa fa-link"></i></a>
+      <a class="doc-anchor" href="{{ reverse "source" ($p.Position .Decl) }}"><i class="fa fa-external-link"></i></a>
+    </h4>
     <pre class="doc">{{ $p.HTMLDecl .Decl }}</pre>
     {{ $p.HTML .Doc }}</p>
   {{ end }}
@@ -56,7 +60,7 @@
         <h3>Types</h3>
         <ul class="list-unstyled">
           {{ range . }}
-            <li><a href="#type-{{ .Name }}">{{ .Name }}</a></li>
+            <li><a href="#{{ type_id . }}">{{ .Name }}</a></li>
           {{ end }}
         </ul>
       {{ end }}
@@ -64,7 +68,7 @@
         <h3>Functions</h3>
         <ul class="list-unstyled">
           {{ range . }}
-            <li><a href="#func-{{ .Name }}">{{ .Name }}</a></li>
+            <li><a href="#{{ func_id . }}">{{ .Name }}</a></li>
           {{ end }}
         </ul>
       {{ end }}
@@ -104,7 +108,11 @@
       {{ with .Types }}
         {{ template "heading" "Types" }}
         {{ range . }}
-          <h3 id="type-{{ .Name }}">type {{ .Name }} <a class="doc-anchor" href="{{ reverse "source" ($package.Position .Decl) }}"><i class="fa fa-external-link"></i></a></h3>
+          {{ $id := type_id . }}
+          <h3 id="{{ $id }}">type {{ .Name }}
+            <a class="doc-anchor" href="#{{ $id }}"><i class="fa fa-link"></i></a>
+            <a class="doc-anchor" href="{{ reverse "source" ($package.Position .Decl) }}"><i class="fa fa-external-link"></i></a>
+          </h3>
           <pre class="doc">{{ $package.HTMLDecl .Decl }}</pre>
           {{ $package.HTML .Doc }}
           {{ template "values" map "Package" $package "Values" .Consts }}
@@ -116,7 +124,11 @@
       {{ with .Funcs }}
         {{ template "heading" "Functions" }}
         {{ range . }}
-          <h3 id="func-{{ .Name }}">func {{ .Name }}  <a class="doc-anchor" href="{{ reverse "source" ($package.Position .Decl) }}"><i class="fa fa-external-link"></i></a></h3>
+          {{ $id := func_id . }}
+          <h3 id="{{ $id }}">func {{ .Name }}
+            <a class="doc-anchor" href="#{{ $id }}"><i class="fa fa-link"></i></a>
+            <a class="doc-anchor" href="{{ reverse "source" ($package.Position .Decl) }}"><i class="fa fa-external-link"></i></a>
+          </h3>
           <pre class="doc">{{ $package.HTMLDecl .Decl }}</pre>
           {{ $package.HTML .Doc }}
         {{ end }}

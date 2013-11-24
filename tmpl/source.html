@@ -5,7 +5,6 @@
 */}}
 {{ define "content" }}
 <div class="container source-code">
-  <!-- TODO: Highight sh, C and ASM properly -->
-  <pre class="brush: go">{{ .Code }}</pre>
+  <pre class="brush: {{ .Brush }}">{{ .Code }}</pre>
 </div>
 {{ end }}

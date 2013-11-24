@@ -1,18 +1,22 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"fmt"
 	"gnd.la/mux"
 	"gnd.la/util"
+	"gnd.la/util/pkgutil"
 	"go/ast"
 	"go/build"
 	"go/doc"
 	"go/parser"
 	"go/token"
 	"html/template"
+	"io"
 	"io/ioutil"
 	"os"
+	"path"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -28,13 +32,134 @@ func noBuildable(err error) bool {
 	return strings.Contains(err.Error(), "no buildable")
 }
 
+func buildContext() *build.Context {
+	ctx := build.Default
+	ctx.GOPATH = util.RelativePath(".")
+	return &ctx
+}
+
 type Package struct {
+	ctx      *mux.Context
 	fset     *token.FileSet
 	name     string
 	bpkg     *build.Package
 	apkg     *ast.Package
 	dpkg     *doc.Package
 	Packages []*Package
+}
+
+func (p *Package) symbolHref(symbol string) string {
+	key := symbol
+	if key[len(key)-1] == ')' && key[len(key)-2] == '(' {
+		key = key[:len(key)-2]
+	}
+	if obj := p.apkg.Scope.Objects[key]; obj != nil {
+		switch obj.Kind {
+		case ast.Typ:
+			return "#type-" + key
+		case ast.Fun:
+			return "#func-" + key
+		case ast.Con:
+			if obj.Type == nil {
+				return "#pkg-constants"
+			}
+		case ast.Var:
+			return "#pkg-variables"
+		}
+	}
+	if dot := strings.IndexByte(key, '.'); dot > 0 {
+		tn := key[:dot]
+		fn := key[dot+1:]
+		fmt.Println("DOT", key, tn)
+		if obj := p.apkg.Scope.Objects[tn]; obj != nil && obj.Kind == ast.Typ {
+			return "#type-" + tn + "-method-" + fn
+		}
+	}
+	return ""
+}
+
+func (p *Package) href(word string) string {
+	slash := strings.IndexByte(word, '/')
+	dot := strings.IndexByte(word, '.')
+	if slash > 0 || dot > 0 {
+		// Check if there's a type or function mentioned
+		// after the package.
+		if pn, tn := pkgutil.SplitQualifiedName(word); pn != "" && tn != "" {
+			if pn[0] == '*' {
+				pn = pn[1:]
+			}
+			if pkg, err := ImportPackage(p.ctx, pn); err == nil {
+				if sr := pkg.symbolHref(tn); sr != "" {
+					return p.ctx.MustReverse("doc", pn) + sr
+				}
+			}
+		} else if _, err := buildContext().Import(word, "", build.FindOnly); err == nil {
+			return p.ctx.MustReverse("doc", word)
+		}
+	}
+	if dot > 0 {
+		// Check the package imports, to see if any of them matches
+		// TODO: Check for packages imported with a different local
+		// name.
+		base := word[:dot]
+		for _, v := range p.bpkg.Imports {
+			if path.Base(v) == base && v != base {
+				return p.href(v + "." + word[dot+1:])
+			}
+		}
+	}
+	if word[0]&0x20 == 0 {
+		// Uppercase
+		return p.symbolHref(word)
+	}
+	return ""
+}
+
+func (p *Package) writeWord(bw *bufio.Writer, buf *bytes.Buffer) {
+	if word := buf.String(); word != "" {
+		// Don't link the first word, since it usually refers to
+		// the type or function name. doc.ToHTML adds 4 characters
+		// before the first word.
+		if href := p.href(word); href != "" && bw.Buffered() > 4 {
+			bw.WriteString("<a href=\"")
+			bw.WriteString(href)
+			bw.WriteString("\">")
+			bw.WriteString(word)
+			bw.WriteString("</a>")
+		} else {
+			bw.WriteString(word)
+		}
+	}
+}
+
+func (p *Package) linkify(w io.Writer, input string) error {
+	bw := bufio.NewWriterSize(w, 512)
+	var buf bytes.Buffer
+	for ii := 0; ii < len(input); ii++ {
+		c := input[ii]
+		switch c {
+		// Include * in the list of stop characters,
+		// so pointers get the link for the pointed type.
+		case ',', ' ', '\n', '\t', '*', '(', ')':
+			p.writeWord(bw, &buf)
+			bw.WriteByte(c)
+			buf.Reset()
+		case '.':
+			if next := ii + 1; next < len(input) {
+				if nc := input[next]; nc == ' ' || nc == '\t' || nc == '\n' {
+					p.writeWord(bw, &buf)
+					bw.WriteByte(c)
+					buf.Reset()
+					continue
+				}
+			}
+			fallthrough
+		default:
+			buf.WriteByte(c)
+		}
+	}
+	bw.WriteString(buf.String())
+	return bw.Flush()
 }
 
 func (p *Package) Name() string {
@@ -80,6 +205,10 @@ func (p *Package) Position(n ast.Node) string {
 	if strings.HasPrefix(filename, srcDir) {
 		filename = filename[len(srcDir)+1:]
 	}
+	if gr := buildContext().GOROOT; strings.HasPrefix(filename, gr) {
+		// Skip the src/ after GOROOT
+		filename = "go" + filename[len(gr)+4:]
+	}
 	return fmt.Sprintf("%s#line-%d", filename, pos.Line)
 }
 
@@ -94,7 +223,9 @@ func (p *Package) Doc() *doc.Package {
 func (p *Package) HTML(text string) template.HTML {
 	var buf bytes.Buffer
 	doc.ToHTML(&buf, text, nil)
-	return template.HTML(buf.String())
+	var out bytes.Buffer
+	p.linkify(&out, buf.String())
+	return template.HTML(out.String())
 }
 
 func (p *Package) HTMLDoc() template.HTML {
@@ -130,15 +261,14 @@ func parseFiles(fset *token.FileSet, abspath string, names []string) (map[string
 	return files, nil
 }
 
-func ImportPackage(p string) (*Package, error) {
-	ctx := build.Default
-	ctx.GOPATH = util.RelativePath(".")
-	b, err := ctx.Import(p, "", 0)
+func ImportPackage(ctx *mux.Context, p string) (*Package, error) {
+	bctx := buildContext()
+	b, err := bctx.Import(p, "", 0)
 	if err != nil {
 		if noBuildable(err) {
 			return nil, err
 		}
-		b, err = ctx.ImportDir(p, 0)
+		b, err = bctx.ImportDir(p, 0)
 		if err != nil {
 			return nil, err
 		}
@@ -158,12 +288,13 @@ func ImportPackage(p string) (*Package, error) {
 		flags |= doc.AllDecls
 	}
 	pkg := &Package{
+		ctx:  ctx,
 		fset: fset,
 		bpkg: b,
 		apkg: a,
 		dpkg: doc.New(a, b.ImportPath, flags),
 	}
-	sub, err := ImportPackages(b.Dir)
+	sub, err := ImportPackages(ctx, b.Dir)
 	if err != nil {
 		return nil, err
 	}
@@ -171,7 +302,7 @@ func ImportPackage(p string) (*Package, error) {
 	return pkg, nil
 }
 
-func ImportPackages(dir string) ([]*Package, error) {
+func ImportPackages(ctx *mux.Context, dir string) ([]*Package, error) {
 	var pkgs []*Package
 	files, err := ioutil.ReadDir(dir)
 	if err != nil {
@@ -185,10 +316,10 @@ func ImportPackages(dir string) ([]*Package, error) {
 		abs := filepath.Join(dir, n)
 		// Follow symlinks
 		if st, err := os.Stat(abs); err == nil && st.IsDir() {
-			pkg, err := ImportPackage(abs)
+			pkg, err := ImportPackage(ctx, abs)
 			if err != nil {
 				if noBuildable(err) {
-					sub, err := ImportPackages(abs)
+					sub, err := ImportPackages(ctx, abs)
 					if err != nil {
 						return nil, err
 					}
@@ -209,7 +340,7 @@ type packageGroup struct {
 }
 
 func DocListHandler(ctx *mux.Context) {
-	pkgs, err := ImportPackages(filepath.Join(srcDir, "gnd.la"))
+	pkgs, err := ImportPackages(ctx, filepath.Join(srcDir, "gnd.la"))
 	if err != nil {
 		panic(err)
 	}
@@ -220,7 +351,7 @@ func DocListHandler(ctx *mux.Context) {
 	var opkgs []*Package
 	for _, v := range infos {
 		if v.IsDir() && v.Name() != "gnd.la" {
-			p, _ := ImportPackages(filepath.Join(srcDir, v.Name()))
+			p, _ := ImportPackages(ctx, filepath.Join(srcDir, v.Name()))
 			opkgs = append(opkgs, p...)
 		}
 	}
@@ -242,10 +373,10 @@ func DocListHandler(ctx *mux.Context) {
 
 func DocHandler(ctx *mux.Context) {
 	path := ctx.IndexValue(0)
-	pkg, err := ImportPackage(path)
+	pkg, err := ImportPackage(ctx, path)
 	if err != nil {
 		if noBuildable(err) {
-			sub, err := ImportPackages(filepath.Join(srcDir, path))
+			sub, err := ImportPackages(ctx, filepath.Join(srcDir, path))
 			if err != nil {
 				panic(err)
 			}
