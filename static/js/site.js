@@ -26,7 +26,7 @@ $(function () {
     $('a').each(function () {
         var a = $(this);
         var href = a.attr('href');
-        if (href && href[0] == '#') {
+        if (href && href[0] == '#' && href != "#") {
             a.click(function () {
                 var target = $($(this).attr('href'));
                 if (target.length) {
