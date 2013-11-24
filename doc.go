@@ -13,6 +13,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 )
 
@@ -57,12 +58,12 @@ func (p *Package) Synopsis() string {
 }
 
 func (p *Package) Filenames() []string {
-	if p.dpkg != nil {
-		f := p.dpkg.Filenames
-		files := make([]string, len(f))
-		for ii, v := range f {
-			files[ii] = filepath.Base(v)
+	if b := p.bpkg; b != nil {
+		var files []string
+		for _, v := range [][]string{b.GoFiles, b.CgoFiles, b.IgnoredGoFiles, b.CFiles, b.CXXFiles, b.HFiles, b.SFiles, b.SysoFiles, b.SwigFiles, b.SwigCXXFiles} {
+			files = append(files, v...)
 		}
+		sort.Strings(files)
 		return files
 	}
 	return nil
