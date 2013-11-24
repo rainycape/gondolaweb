@@ -18,7 +18,7 @@
 {{ define "funcs" }}
   {{ $p := .Package }}
   {{ range .Funcs }}
-    <h4>{{ .Name }}</h4>
+  <h4>func {{ with.Recv }}({{ . }}) {{ end }}{{ .Name }} <a class="doc-anchor" href="{{ reverse "source" ($p.Position .Decl) }}"><i class="fa fa-external-link"></i></a></h4>
     <pre class="doc">{{ $p.HTMLDecl .Decl }}</pre>
     {{ $p.HTML .Doc }}</p>
   {{ end }}
@@ -104,7 +104,7 @@
       {{ with .Types }}
         {{ template "heading" "Types" }}
         {{ range . }}
-          <h3 id="type-{{ .Name }}">type {{ .Name }}</h3>
+          <h3 id="type-{{ .Name }}">type {{ .Name }} <a class="doc-anchor" href="{{ reverse "source" ($package.Position .Decl) }}"><i class="fa fa-external-link"></i></a></h3>
           <pre class="doc">{{ $package.HTMLDecl .Decl }}</pre>
           {{ $package.HTML .Doc }}
           {{ template "values" map "Package" $package "Values" .Consts }}
@@ -116,7 +116,7 @@
       {{ with .Funcs }}
         {{ template "heading" "Functions" }}
         {{ range . }}
-          <h3 id="func-{{ .Name }}">func {{ .Name }}</h3>
+          <h3 id="func-{{ .Name }}">func {{ .Name }}  <a class="doc-anchor" href="{{ reverse "source" ($package.Position .Decl) }}"><i class="fa fa-external-link"></i></a></h3>
           <pre class="doc">{{ $package.HTMLDecl .Decl }}</pre>
           {{ $package.HTML .Doc }}
         {{ end }}

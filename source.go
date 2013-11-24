@@ -2,7 +2,6 @@ package main
 
 import (
 	"gnd.la/mux"
-	"gnd.la/util"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -11,7 +10,7 @@ import (
 
 func SourceHandler(ctx *mux.Context) {
 	rel := ctx.IndexValue(0)
-	path := util.RelativePath(filepath.Join("pkg", rel))
+	path := filepath.Join(srcDir, filepath.FromSlash(rel))
 	info, err := os.Stat(path)
 	if err != nil {
 		ctx.NotFound("File not found")

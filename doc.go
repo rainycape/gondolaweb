@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"gnd.la/mux"
 	"gnd.la/util"
 	"go/ast"
@@ -22,6 +23,10 @@ var (
 	cwd       = util.RelativePath("..")
 	srcPrefix = srcDir[len(cwd)+1:]
 )
+
+func noBuildable(err error) bool {
+	return strings.Contains(err.Error(), "no buildable")
+}
 
 type Package struct {
 	fset     *token.FileSet
@@ -67,6 +72,15 @@ func (p *Package) Filenames() []string {
 		return files
 	}
 	return nil
+}
+
+func (p *Package) Position(n ast.Node) string {
+	pos := p.fset.Position(n.Pos())
+	filename := pos.Filename
+	if strings.HasPrefix(filename, srcDir) {
+		filename = filename[len(srcDir)+1:]
+	}
+	return fmt.Sprintf("%s#line-%d", filename, pos.Line)
 }
 
 func (p *Package) HasDoc() bool {
@@ -121,6 +135,9 @@ func ImportPackage(p string) (*Package, error) {
 	ctx.GOPATH = util.RelativePath(".")
 	b, err := ctx.Import(p, "", 0)
 	if err != nil {
+		if noBuildable(err) {
+			return nil, err
+		}
 		b, err = ctx.ImportDir(p, 0)
 		if err != nil {
 			return nil, err
@@ -170,7 +187,7 @@ func ImportPackages(dir string) ([]*Package, error) {
 		if st, err := os.Stat(abs); err == nil && st.IsDir() {
 			pkg, err := ImportPackage(abs)
 			if err != nil {
-				if strings.Contains(err.Error(), "no buildable") {
+				if noBuildable(err) {
 					sub, err := ImportPackages(abs)
 					if err != nil {
 						return nil, err
@@ -227,7 +244,7 @@ func DocHandler(ctx *mux.Context) {
 	path := ctx.IndexValue(0)
 	pkg, err := ImportPackage(path)
 	if err != nil {
-		if strings.Contains(err.Error(), "no buildable") {
+		if noBuildable(err) {
 			sub, err := ImportPackages(filepath.Join(srcDir, path))
 			if err != nil {
 				panic(err)
