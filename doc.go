@@ -17,9 +17,9 @@ import (
 )
 
 var (
-	root       = util.RelativePath("pkg")
-	cwd        = util.RelativePath("..")
-	rootPrefix = root[len(cwd)+1:]
+	srcDir    = util.RelativePath("src")
+	cwd       = util.RelativePath("..")
+	srcPrefix = srcDir[len(cwd)+1:]
 )
 
 type Package struct {
@@ -41,8 +41,8 @@ func (p *Package) Name() string {
 func (p *Package) ImportPath() string {
 	if p.bpkg != nil {
 		path := p.bpkg.ImportPath
-		if strings.HasPrefix(path, rootPrefix) {
-			path = path[len(rootPrefix)+1:]
+		if strings.HasPrefix(path, srcPrefix) {
+			path = path[len(srcPrefix)+1:]
 		}
 		return path
 	}
@@ -117,6 +117,7 @@ func parseFiles(fset *token.FileSet, abspath string, names []string) (map[string
 
 func ImportPackage(p string) (*Package, error) {
 	ctx := build.Default
+	ctx.GOPATH = util.RelativePath(".")
 	b, err := ctx.Import(p, "", 0)
 	if err != nil {
 		b, err = ctx.ImportDir(p, 0)
@@ -134,11 +135,15 @@ func ImportPackage(p string) (*Package, error) {
 	// NewPackage will always return errors because it won't
 	// resolve builtin types.
 	a, _ := ast.NewPackage(fset, files, pkgImporter, nil)
+	flags := doc.AllMethods
+	if p == "builtin" {
+		flags |= doc.AllDecls
+	}
 	pkg := &Package{
 		fset: fset,
 		bpkg: b,
 		apkg: a,
-		dpkg: doc.New(a, b.ImportPath, doc.AllMethods),
+		dpkg: doc.New(a, b.ImportPath, flags),
 	}
 	sub, err := ImportPackages(b.Dir)
 	if err != nil {
@@ -180,17 +185,39 @@ func ImportPackages(dir string) ([]*Package, error) {
 	return pkgs, nil
 }
 
+type packageGroup struct {
+	Title    string
+	Packages []*Package
+}
+
 func DocListHandler(ctx *mux.Context) {
-	pkgs, err := ImportPackages(root)
+	pkgs, err := ImportPackages(filepath.Join(srcDir, "gnd.la"))
 	if err != nil {
 		panic(err)
+	}
+	groups := []packageGroup{
+		{Title: "Gondola Packages", Packages: pkgs},
+	}
+	infos, _ := ioutil.ReadDir(srcDir)
+	var opkgs []*Package
+	for _, v := range infos {
+		if v.IsDir() && v.Name() != "gnd.la" {
+			p, _ := ImportPackages(filepath.Join(srcDir, v.Name()))
+			opkgs = append(opkgs, p...)
+		}
+	}
+	if len(opkgs) > 0 {
+		groups = append(groups, packageGroup{
+			Title:    "Other useful Rainy Cape's packages",
+			Packages: opkgs,
+		})
 	}
 	title := "Package Index"
 	data := map[string]interface{}{
 		"HeaderTitle": title,
 		"Subtitle":    title,
 		"Section":     "docs",
-		"Packages":    pkgs,
+		"Groups":      groups,
 	}
 	ctx.MustExecute("pkgs.html", data)
 }
@@ -200,7 +227,7 @@ func DocHandler(ctx *mux.Context) {
 	pkg, err := ImportPackage(path)
 	if err != nil {
 		if strings.Contains(err.Error(), "no buildable") {
-			sub, err := ImportPackages(filepath.Join(root, path))
+			sub, err := ImportPackages(filepath.Join(srcDir, path))
 			if err != nil {
 				panic(err)
 			}

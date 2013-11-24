@@ -24,6 +24,7 @@ type Breadcrumb struct {
 
 func main() {
 	config.MustParse(&Config)
+	StartUpdatingRepos()
 	m := mux.New()
 	m.HandleFunc("^/$", mux.TemplateHandler("main.html", util.M{"Section": "home"}))
 	m.HandleNamedFunc("^/tutorials/$", "tutorials", nil)

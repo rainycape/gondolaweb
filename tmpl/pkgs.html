@@ -11,13 +11,16 @@
 {{ end }}
 
 {{ define "content" }}
-<div class="container">
-  <table class="table table-striped">
-    <tbody>
-      {{ range .Packages }}
-        {{ template "package" . }}
-      {{ end }}
-    </tbody>
-  </table>
-</div>
+{{ range .Groups }}
+  <div class="container">
+    <h2>{{ .Title }}</h2>
+    <table class="table table-striped">
+      <tbody>
+        {{ range .Packages }}
+          {{ template "package" . }}
+        {{ end }}
+      </tbody>
+    </table>
+  </div>
+{{ end }}
 {{ end }}
