@@ -8,9 +8,30 @@ import (
 	"strings"
 )
 
+var (
+	highlighters = map[string]string{
+		".c":    "c",
+		".cpp":  "cpp",
+		".css":  "css",
+		".cxx":  "cpp",
+		".go":   "go",
+		".h":    "c",
+		".hpp":  "cpp",
+		".hxx":  "cpp",
+		".js":   "js",
+		".sh":   "sh",
+		".bash": "sh",
+	}
+)
+
 func SourceHandler(ctx *mux.Context) {
 	rel := ctx.IndexValue(0)
-	path := filepath.Join(srcDir, filepath.FromSlash(rel))
+	var path string
+	if strings.HasPrefix(rel, "go") {
+		path = filepath.Join(buildContext().GOROOT, "src", filepath.FromSlash(rel[2:]))
+	} else {
+		path = filepath.Join(srcDir, filepath.FromSlash(rel))
+	}
 	info, err := os.Stat(path)
 	if err != nil {
 		ctx.NotFound("File not found")
@@ -67,6 +88,7 @@ func SourceHandler(ctx *mux.Context) {
 		"Breadcrumbs": breadcrumbs,
 		"Files":       files,
 		"Code":        code,
+		"Highlighter": highlighters[filepath.Ext(rel)],
 	}
 	ctx.MustExecute(template, data)
 }

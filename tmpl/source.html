@@ -1,10 +1,12 @@
 {{/*
     extends: header.html
     styles: css/shThemeDefault.css
-    scripts: js/xregexp.js, js/shCore.js, js/shBrushGo.js, js/highlight.js
+    scripts: js/xregexp.js, js/shCore.js, js/shBrushGo.js, js/shBrushBash.js, \
+      js/shBrushCpp.js, js/shBrushCss.js, js/shBrushJScript.js, js/shBrushPlain.js, \
+      js/highlight.js
 */}}
 {{ define "content" }}
 <div class="container source-code">
-  <pre class="brush: {{ .Brush }}">{{ .Code }}</pre>
+  <pre class="brush: {{ with .Highlighter }}{{ . }}{{ else }}plain{{ end }}">{{ .Code }}</pre>
 </div>
 {{ end }}
