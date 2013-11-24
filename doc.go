@@ -70,15 +70,23 @@ func (p *Package) symbolHref(symbol string) string {
 	if dot := strings.IndexByte(key, '.'); dot > 0 {
 		tn := key[:dot]
 		fn := key[dot+1:]
-		fmt.Println("DOT", key, tn)
 		if obj := p.apkg.Scope.Objects[tn]; obj != nil && obj.Kind == ast.Typ {
-			return "#type-" + tn + "-method-" + fn
+			for _, v := range p.dpkg.Types {
+				if v.Name == tn {
+					for _, m := range v.Methods {
+						if m.Name == fn {
+							return "#type-" + tn + "-method-" + fn
+						}
+					}
+					return ""
+				}
+			}
 		}
 	}
 	return ""
 }
 
-func (p *Package) href(word string) string {
+func (p *Package) href(word string, scope string) string {
 	slash := strings.IndexByte(word, '/')
 	dot := strings.IndexByte(word, '.')
 	if slash > 0 || dot > 0 {
@@ -104,35 +112,41 @@ func (p *Package) href(word string) string {
 		base := word[:dot]
 		for _, v := range p.bpkg.Imports {
 			if path.Base(v) == base && v != base {
-				return p.href(v + "." + word[dot+1:])
+				return p.href(v+"."+word[dot+1:], scope)
 			}
 		}
 	}
 	if word[0]&0x20 == 0 {
 		// Uppercase
+		if scope != "" {
+			if href := p.symbolHref(scope + "." + word); href != "" {
+				return href
+			}
+		}
 		return p.symbolHref(word)
 	}
 	return ""
 }
 
-func (p *Package) writeWord(bw *bufio.Writer, buf *bytes.Buffer) {
+func (p *Package) writeWord(bw *bufio.Writer, buf *bytes.Buffer, scope string) {
 	if word := buf.String(); word != "" {
-		// Don't link the first word, since it usually refers to
-		// the type or function name. doc.ToHTML adds 4 characters
-		// before the first word.
-		if href := p.href(word); href != "" && bw.Buffered() > 4 {
-			bw.WriteString("<a href=\"")
-			bw.WriteString(href)
-			bw.WriteString("\">")
+		if word == scope {
 			bw.WriteString(word)
-			bw.WriteString("</a>")
 		} else {
-			bw.WriteString(word)
+			if href := p.href(word, scope); href != "" {
+				bw.WriteString("<a href=\"")
+				bw.WriteString(href)
+				bw.WriteString("\">")
+				bw.WriteString(word)
+				bw.WriteString("</a>")
+			} else {
+				bw.WriteString(word)
+			}
 		}
 	}
 }
 
-func (p *Package) linkify(w io.Writer, input string) error {
+func (p *Package) linkify(w io.Writer, input string, scope string) error {
 	bw := bufio.NewWriterSize(w, 512)
 	var buf bytes.Buffer
 	for ii := 0; ii < len(input); ii++ {
@@ -141,13 +155,13 @@ func (p *Package) linkify(w io.Writer, input string) error {
 		// Include * in the list of stop characters,
 		// so pointers get the link for the pointed type.
 		case ',', ' ', '\n', '\t', '*', '(', ')':
-			p.writeWord(bw, &buf)
+			p.writeWord(bw, &buf, scope)
 			bw.WriteByte(c)
 			buf.Reset()
 		case '.':
 			if next := ii + 1; next < len(input) {
 				if nc := input[next]; nc == ' ' || nc == '\t' || nc == '\n' {
-					p.writeWord(bw, &buf)
+					p.writeWord(bw, &buf, scope)
 					bw.WriteByte(c)
 					buf.Reset()
 					continue
@@ -220,12 +234,20 @@ func (p *Package) Doc() *doc.Package {
 	return p.dpkg
 }
 
-func (p *Package) HTML(text string) template.HTML {
+func (p *Package) html(text string, scope string) template.HTML {
 	var buf bytes.Buffer
 	doc.ToHTML(&buf, text, nil)
 	var out bytes.Buffer
-	p.linkify(&out, buf.String())
+	p.linkify(&out, buf.String(), scope)
 	return template.HTML(out.String())
+}
+
+func (p *Package) HTML(text string) template.HTML {
+	return p.html(text, "")
+}
+
+func (p *Package) ScopedHTML(text string, scope string) template.HTML {
+	return p.html(text, scope)
 }
 
 func (p *Package) HTMLDoc() template.HTML {
