@@ -22,9 +22,10 @@ func FormatNode(fset *token.FileSet, node interface{}) (string, error) {
 	return FormatComments(escaped), nil
 }
 
+func commentRepl(text string) string {
+	return "<span class=\"comments\">" + text + "</span>"
+}
+
 func FormatComments(text string) string {
-	repl := func(s string) string {
-		return "<span class=\"comments\">" + s + "</span>"
-	}
-	return multilineCommentRe.ReplaceAllStringFunc(commentRe.ReplaceAllStringFunc(text, repl), repl)
+	return multilineCommentRe.ReplaceAllStringFunc(commentRe.ReplaceAllStringFunc(text, commentRepl), commentRepl)
 }
