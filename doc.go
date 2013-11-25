@@ -178,7 +178,7 @@ func (p *Package) linkify(w io.Writer, input string, scope string, ignored map[s
 			buf.WriteByte(c)
 		}
 	}
-	bw.WriteString(buf.String())
+	p.writeWord(bw, &buf, scope, ignored)
 	return bw.Flush()
 }
 
