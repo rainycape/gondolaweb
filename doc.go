@@ -18,6 +18,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 )
@@ -26,6 +27,7 @@ var (
 	srcDir    = util.RelativePath("src")
 	cwd       = util.RelativePath("..")
 	srcPrefix = srcDir[len(cwd)+1:]
+	valueRe   = regexp.MustCompile("([A-Z]\\w+)((?:\\s+<a.*?</a>)?\\s+=)")
 )
 
 func noBuildable(err error) bool {
@@ -60,11 +62,9 @@ func (p *Package) symbolHref(symbol string) string {
 		case ast.Fun:
 			return "#func-" + key
 		case ast.Con:
-			if obj.Type == nil {
-				return "#pkg-constants"
-			}
+			return "#const-" + key
 		case ast.Var:
-			return "#pkg-variables"
+			return "#var-" + key
 		}
 	}
 	if dot := strings.IndexByte(key, '.'); dot > 0 {
@@ -288,6 +288,11 @@ func (p *Package) HTMLDecl(node interface{}) (template.HTML, error) {
 		var buf bytes.Buffer
 		p.linkify(&buf, s, scope, ignored)
 		s = buf.String()
+	}
+	if strings.HasPrefix(s, "const ") {
+		s = valueRe.ReplaceAllString(s, "<span id=\"const-${1}\">${1}</span>${2}")
+	} else if strings.HasPrefix(s, "var ") {
+		s = valueRe.ReplaceAllString(s, "<span id=\"var-${1}\">${1}</span>${2}")
 	}
 	return template.HTML(s), err
 }
