@@ -128,9 +128,9 @@ func (p *Package) href(word string, scope string) string {
 	return ""
 }
 
-func (p *Package) writeWord(bw *bufio.Writer, buf *bytes.Buffer, scope string) {
+func (p *Package) writeWord(bw *bufio.Writer, buf *bytes.Buffer, scope string, ignored map[string]struct{}) {
 	if word := buf.String(); word != "" {
-		if word == scope {
+		if _, ign := ignored[word]; ign || word == scope {
 			bw.WriteString(word)
 		} else {
 			if href := p.href(word, scope); href != "" {
@@ -146,22 +146,24 @@ func (p *Package) writeWord(bw *bufio.Writer, buf *bytes.Buffer, scope string) {
 	}
 }
 
-func (p *Package) linkify(w io.Writer, input string, scope string) error {
+func (p *Package) linkify(w io.Writer, input string, scope string, ignored map[string]struct{}) error {
 	bw := bufio.NewWriterSize(w, 512)
 	var buf bytes.Buffer
 	for ii := 0; ii < len(input); ii++ {
 		c := input[ii]
 		switch c {
-		// Include * in the list of stop characters,
+		// Include * and & in the list of stop characters,
 		// so pointers get the link for the pointed type.
-		case ',', ' ', '\n', '\t', '*', '(', ')':
-			p.writeWord(bw, &buf, scope)
+		// Include ;, so escaped amperstands do not end up
+		// in the type names.
+		case ',', ' ', '\n', '\t', '(', ')', '*', '&', '{', '}', ';':
+			p.writeWord(bw, &buf, scope, ignored)
 			bw.WriteByte(c)
 			buf.Reset()
 		case '.':
 			if next := ii + 1; next < len(input) {
 				if nc := input[next]; nc == ' ' || nc == '\t' || nc == '\n' {
-					p.writeWord(bw, &buf, scope)
+					p.writeWord(bw, &buf, scope, ignored)
 					bw.WriteByte(c)
 					buf.Reset()
 					continue
@@ -238,7 +240,7 @@ func (p *Package) html(text string, scope string) template.HTML {
 	var buf bytes.Buffer
 	doc.ToHTML(&buf, text, nil)
 	var out bytes.Buffer
-	p.linkify(&out, buf.String(), scope)
+	p.linkify(&out, buf.String(), scope, nil)
 	return template.HTML(out.String())
 }
 
@@ -256,6 +258,34 @@ func (p *Package) HTMLDoc() template.HTML {
 
 func (p *Package) HTMLDecl(node interface{}) (template.HTML, error) {
 	s, err := FormatNode(p.fset, node)
+	if err == nil {
+		var scope string
+		var ignored map[string]struct{}
+		ignore := func(x string) {
+			if ignored == nil {
+				ignored = make(map[string]struct{})
+			}
+			ignored[x] = struct{}{}
+		}
+		switch n := node.(type) {
+		case *ast.FuncDecl:
+			scope = n.Name.Name
+		case *ast.GenDecl:
+			for _, spec := range n.Specs {
+				switch s := spec.(type) {
+				case *ast.TypeSpec:
+					scope = s.Name.Name
+				case *ast.ValueSpec:
+					for _, name := range s.Names {
+						ignore(name.Name)
+					}
+				}
+			}
+		}
+		var buf bytes.Buffer
+		p.linkify(&buf, s, scope, ignored)
+		s = buf.String()
+	}
 	return template.HTML(s), err
 }
 
