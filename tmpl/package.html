@@ -4,7 +4,10 @@
 
 {{ define "heading" }}
   {{ $lower := to_lower . }}
-  <h2 id="pkg-{{ $lower }}">{{ . }} <a class="doc-anchor" href="#pkg-{{ $lower }}">{{ fa "link" }}</a></h2>
+  <h2 id="pkg-{{ $lower }}">{{ . }}
+    <a class="doc-anchor slide-up" href="#">{{ fa "caret-up" }}</a>
+    <a class="doc-anchor" href="#pkg-{{ $lower }}">{{ fa "link" }}</a>
+  </h2>
 {{ end }}
 
 {{ define "values" }}
@@ -94,44 +97,54 @@
     {{ end }}
     {{ if .HasDoc }}
       {{ template "heading" "Documentation" }}
-      {{ .HTMLDoc }}
+      <div>
+        {{ .HTMLDoc }}
+      </div>
     {{ end }}
     {{ with $doc }}
       {{ with .Consts }}
         {{ template "heading" "Constants" }}
-        {{ template "values" map "Package" $package "Values" . }}
+        <div>
+          {{ template "values" map "Package" $package "Values" . }}
+        </div>
       {{ end }}
       {{ with .Vars }}
         {{ template "heading" "Variables" }}
-        {{ template "values" map "Package" $package "Values" . }}
+        <div>
+          {{ template "values" map "Package" $package "Values" . }}
+        </div>
       {{ end }}
       {{ with .Types }}
         {{ template "heading" "Types" }}
-        {{ range . }}
-          {{ $id := type_id . }}
-          <h3 id="{{ $id }}">type {{ .Name }}
-            <a class="doc-anchor" href="#{{ $id }}">{{ fa "link" }}</a>
-            <a class="doc-anchor" href="{{ reverse "source" ($package.Position .Decl) }}">{{ fa "external-link" }}</a>
-          </h3>
-          <pre class="doc">{{ $package.HTMLDecl .Decl }}</pre>
-          {{ $package.ScopedHTML .Doc .Name }}
-          {{ template "values" map "Package" $package "Values" .Consts }}
-          {{ template "values" map "Package" $package "Values" .Vars }}
-          {{ template "funcs" map "Package" $package "Funcs" .Funcs }}
-          {{ template "funcs" map "Package" $package "Funcs" .Methods }}
-        {{ end }}
+        <div>
+          {{ range . }}
+            {{ $id := type_id . }}
+            <h3 id="{{ $id }}">type {{ .Name }}
+              <a class="doc-anchor" href="#{{ $id }}">{{ fa "link" }}</a>
+              <a class="doc-anchor" href="{{ reverse "source" ($package.Position .Decl) }}">{{ fa "external-link" }}</a>
+            </h3>
+            <pre class="doc">{{ $package.HTMLDecl .Decl }}</pre>
+            {{ $package.ScopedHTML .Doc .Name }}
+            {{ template "values" map "Package" $package "Values" .Consts }}
+            {{ template "values" map "Package" $package "Values" .Vars }}
+            {{ template "funcs" map "Package" $package "Funcs" .Funcs }}
+            {{ template "funcs" map "Package" $package "Funcs" .Methods }}
+          {{ end }}
+        </div>
       {{ end }}
       {{ with .Funcs }}
         {{ template "heading" "Functions" }}
-        {{ range . }}
-          {{ $id := func_id . }}
-          <h3 id="{{ $id }}">func {{ .Name }}
-            <a class="doc-anchor" href="#{{ $id }}">{{ fa "link" }}</a>
-            <a class="doc-anchor" href="{{ reverse "source" ($package.Position .Decl) }}">{{ fa "external-link" }}</a>
-          </h3>
-          <pre class="doc">{{ $package.HTMLDecl .Decl }}</pre>
-          {{ $package.ScopedHTML .Doc .Name }}
-        {{ end }}
+        <div>
+          {{ range . }}
+            {{ $id := func_id . }}
+            <h3 id="{{ $id }}">func {{ .Name }}
+              <a class="doc-anchor" href="#{{ $id }}">{{ fa "link" }}</a>
+              <a class="doc-anchor" href="{{ reverse "source" ($package.Position .Decl) }}">{{ fa "external-link" }}</a>
+            </h3>
+            <pre class="doc">{{ $package.HTMLDecl .Decl }}</pre>
+            {{ $package.ScopedHTML .Doc .Name }}
+          {{ end }}
+        </div>
       {{ end }}
     {{ end }}
   </div>

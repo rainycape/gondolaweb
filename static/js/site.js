@@ -39,4 +39,14 @@ $(function () {
             });
         }
     });
+    $('a.slide-up').click(function () {
+        var div = $(this).parents('h2').first().next();
+        if (div.is(':visible')) {
+            div.slideUp();
+        } else {
+            div.slideDown();
+        }
+        $(this).toggleClass('inverted');
+        return false;
+    });
 });

@@ -154,6 +154,28 @@ a, h1, h2, h3, h4, h5, h6 {
     .fa-external-link {
         font-size: 90%;
     }
+
+    i {
+        -webkit-transition: all 0.2s;
+        -moz-transition: all 0.2s;
+        -o-transition: all 0.2s;
+        -ms-transition: all 0.2s;
+        transition: all 0.2s;
+    }
+
+    &.slide-up {
+        position: relative;
+    }
+    &.inverted {
+        display: inline;
+        i {
+            -webkit-transform: rotate(180deg);
+            -moz-transform: rotate(180deg);
+            -o-transform: rotate(180deg);
+            -ms-transform: rotate(180deg);
+            transform: rotate(180deg);
+        }
+    }
 }
 
 h1, h2, h3, h4, h5, h5 {
