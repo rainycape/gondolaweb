@@ -29,6 +29,7 @@ var (
 	cwd       = util.RelativePath("..")
 	srcPrefix = srcDir[len(cwd)+1:]
 	valueRe   = regexp.MustCompile("([A-Z]\\w+)((?:\\s+<a.*?</a>)?\\s+=)")
+	httpRe    = regexp.MustCompile("(https?://.*?)(\\s|\\.($|\\s|<|>))")
 )
 
 func noBuildable(err error) bool {
@@ -483,7 +484,7 @@ func (p *Package) HTMLDecl(node interface{}) (template.HTML, error) {
 		name, ignored := p.scopeParameters(node)
 		var buf bytes.Buffer
 		p.linkify(&buf, s, name, ignored)
-		s = buf.String()
+		s = httpRe.ReplaceAllString(buf.String(), "<a rel=\"nofollow\" href=\"${1}\">${1}</a>${2}")
 	}
 	if strings.HasPrefix(s, "const ") {
 		s = valueRe.ReplaceAllString(s, "<span id=\""+constPrefix+"${1}\">${1}</span>${2}")
