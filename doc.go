@@ -51,6 +51,7 @@ const (
 	Type
 	Method
 	Field
+	IMethod
 )
 
 const (
@@ -64,12 +65,14 @@ func (k UndocumentedKind) Score() int {
 	switch k {
 	case Const, Var:
 		return valueScore
-	case Func, Method:
+	case Func, Method, IMethod:
 		return funcScore
 	case Type:
 		return typeScore
 	case Field:
 		return fieldScore
+	case 0:
+		return 0
 	}
 	panic("unreachable")
 }
@@ -94,6 +97,8 @@ func (u *Undocumented) String() string {
 		return "method (" + u.Type + ") " + u.Name
 	case Field:
 		return "field " + u.Name + " on type " + u.Type
+	case IMethod:
+		return "method " + u.Name + " on interface " + u.Type
 	}
 	return "invalid Undocumented"
 }
@@ -111,6 +116,8 @@ func (u *Undocumented) Id() string {
 	case Method:
 		return MethodId(u.Type, u.Name)
 	case Field:
+		return TypeId(u.Type)
+	case IMethod:
 		return TypeId(u.Type)
 	}
 	return ""
@@ -375,33 +382,41 @@ func (p *Package) typeStats(typs []*doc.Type, stats *DocStats, total *int, score
 			})
 		}
 		// Fields
+		var k UndocumentedKind
 		ts := v.Decl.Specs[0].(*ast.TypeSpec)
+		var fields []*ast.Field
 		switch s := ts.Type.(type) {
 		case *ast.StructType:
-			for _, f := range s.Fields.List {
-				*total += fieldScore
-				if f.Doc != nil || f.Comment != nil {
-					*score += fieldScore
+			fields = s.Fields.List
+			k = Field
+		case *ast.InterfaceType:
+			fields = s.Methods.List
+			k = IMethod
+		}
+		fs := k.Score()
+		for _, f := range fields {
+			*total += fs
+			if f.Doc != nil || f.Comment != nil {
+				*score += fs
+			} else {
+				var name string
+				if len(f.Names) > 0 {
+					name = astutil.Ident(f.Names[0])
 				} else {
-					var name string
-					if len(f.Names) > 0 {
-						name = astutil.Ident(f.Names[0])
-					} else {
-						// Embedded field
-						name = astutil.Ident(f.Type)
-						if name[0] == '*' {
-							name = name[1:]
-						}
-						if dot := strings.IndexByte(name, '.'); dot >= 0 {
-							name = name[dot+1:]
-						}
+					// Embedded field
+					name = astutil.Ident(f.Type)
+					if name[0] == '*' {
+						name = name[1:]
 					}
-					stats.Undocumented = append(stats.Undocumented, &Undocumented{
-						Kind: Field,
-						Name: name,
-						Type: v.Name,
-					})
+					if dot := strings.IndexByte(name, '.'); dot >= 0 {
+						name = name[dot+1:]
+					}
 				}
+				stats.Undocumented = append(stats.Undocumented, &Undocumented{
+					Kind: k,
+					Name: name,
+					Type: v.Name,
+				})
 			}
 		}
 		p.valueStats(Const, v.Consts, stats, total, score)
