@@ -4,7 +4,7 @@
 
 {{ define "heading" }}
   {{ $lower := to_lower . }}
-  <h2 id="pkg-{{ $lower }}">{{ . }} <a class="doc-anchor" href="#pkg-{{ $lower }}"><i class="fa fa-link"></i></a></h2>
+  <h2 id="pkg-{{ $lower }}">{{ . }} <a class="doc-anchor" href="#pkg-{{ $lower }}">{{ fa "link" }}</a></h2>
 {{ end }}
 
 {{ define "values" }}
@@ -20,8 +20,8 @@
   {{ range .Funcs }}
     {{ $id := func_id . }}
     <h4 id="{{ $id }}">func {{ with .Recv }}({{ . }}) {{ end }}{{ .Name }}
-      <a class="doc-anchor" href="#{{ $id }}"><i class="fa fa-link"></i></a>
-      <a class="doc-anchor" href="{{ reverse "source" ($p.Position .Decl) }}"><i class="fa fa-external-link"></i></a>
+      <a class="doc-anchor" href="#{{ $id }}">{{ fa "link" }}</a>
+      <a class="doc-anchor" href="{{ reverse "source" ($p.Position .Decl) }}">{{ fa "external-link" }}</a>
     </h4>
     <pre class="doc">{{ $p.HTMLDecl .Decl }}</pre>
     {{ $p.ScopedHTML .Doc .Name }}</p>
@@ -110,8 +110,8 @@
         {{ range . }}
           {{ $id := type_id . }}
           <h3 id="{{ $id }}">type {{ .Name }}
-            <a class="doc-anchor" href="#{{ $id }}"><i class="fa fa-link"></i></a>
-            <a class="doc-anchor" href="{{ reverse "source" ($package.Position .Decl) }}"><i class="fa fa-external-link"></i></a>
+            <a class="doc-anchor" href="#{{ $id }}">{{ fa "link" }}</a>
+            <a class="doc-anchor" href="{{ reverse "source" ($package.Position .Decl) }}">{{ fa "external-link" }}</a>
           </h3>
           <pre class="doc">{{ $package.HTMLDecl .Decl }}</pre>
           {{ $package.ScopedHTML .Doc .Name }}
@@ -126,8 +126,8 @@
         {{ range . }}
           {{ $id := func_id . }}
           <h3 id="{{ $id }}">func {{ .Name }}
-            <a class="doc-anchor" href="#{{ $id }}"><i class="fa fa-link"></i></a>
-            <a class="doc-anchor" href="{{ reverse "source" ($package.Position .Decl) }}"><i class="fa fa-external-link"></i></a>
+            <a class="doc-anchor" href="#{{ $id }}">{{ fa "link" }}</a>
+            <a class="doc-anchor" href="{{ reverse "source" ($package.Position .Decl) }}">{{ fa "external-link" }}</a>
           </h3>
           <pre class="doc">{{ $package.HTMLDecl .Decl }}</pre>
           {{ $package.ScopedHTML .Doc .Name }}
