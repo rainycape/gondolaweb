@@ -42,7 +42,7 @@
         {{ $stats := .DocStats }}
         {{ with $stats }}
           {{ $p := .NormalizedScore }}
-          <span data-toggle="tooltip" title="Percentage Documented" class="label label-{{ if lt $p 25 }}danger{{ else if lt $p 50 }}warning{{ else if lt $p 75 }}info{{ else }}success{{ end }}">{{ $p }}%</span>
+          <span data-toggle="tooltip" title="Documentation Score" class="label label-{{ if lt $p 25 }}danger{{ else if lt $p 50 }}warning{{ else if lt $p 75 }}info{{ else }}success{{ end }}">{{ $p }}%</span>
           {{ if .Undocumented }}
             <a class="show-undocumented" href="#pkg-undocumented" rel="popover">Improve this!</a>
           {{ end }}
