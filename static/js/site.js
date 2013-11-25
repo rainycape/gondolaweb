@@ -15,7 +15,7 @@ function scrollPosition(pos, animated) {
 }
 
 function setupHashAnchors(el) {
-    el = el || $(document);
+    el = el || $('body');
     el.find('a').each(function () {
         var a = $(this);
         var href = a.attr('href');
@@ -36,6 +36,7 @@ function setupHashAnchors(el) {
 
 $(function () {
     $("[data-toggle='tooltip']").tooltip(); 
+    setupHashAnchors();
     if (window.location.hash) {
         var el = $(window.location.hash);
         if (el.length) {
@@ -56,9 +57,8 @@ $(function () {
     });
     $('a[rel="popover"]').click(function () {
         var a = $(this);
-        if (a.data('popover')) {
+        if (a.data('bs.popover')) {
             a.popover('destroy');
-            a.data('popover', false);
             $('body').off('click.popover');
         } else {
             var target = $(a.attr('href')).clone();
@@ -69,8 +69,10 @@ $(function () {
                 content: target.html(),
                 trigger: 'manual'
             });
+            var tip = a.data('bs.popover').tip();
+            tip.css('max-width', 'none');
             a.popover('show');
-            a.data('popover', true);
+            setupHashAnchors(tip);
             $('body').on('click.popover', function (e) {
                 if (a.has(e.target).length === 0 && $('.popover').has(e.target).length === 0) {
                     a.click();
