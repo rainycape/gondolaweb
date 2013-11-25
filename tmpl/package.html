@@ -36,7 +36,33 @@
 {{ with .Package }}
   {{ $package := . }}
   <div class="container">
-    {{ with .ImportPath }}<p class="import">import "{{ . }}"</p>{{ end }}
+    {{ if .ImportPath }}
+      <p>
+        <span class="import">import "{{ .ImportPath }}"</span>
+        {{ $stats := .DocStats }}
+        {{ with $stats }}
+          {{ $p := .NormalizedScore }}
+          <span data-toggle="tooltip" title="Percentage Documented" class="label label-{{ if lt $p 25 }}danger{{ else if lt $p 50 }}warning{{ else if lt $p 75 }}info{{ else }}success{{ end }}">{{ $p }}%</span>
+          {{ if .Undocumented }}
+            <a class="show-undocumented" href="#pkg-undocumented" rel="popover">Improve this!</a>
+          {{ end }}
+        {{ end }}
+      </p>
+      {{ with $stats }}
+        <div id="pkg-undocumented" class="pkg-undocumented">
+          <table class="table table-striped">
+            <tbody>
+              {{ if not .HasDoc }}
+              <tr><td>Write this package's <a href="http://blog.golang.org/godoc-documenting-go-code">documentation</a></td><td><span class="label label-success">+{{ .DocScore }}%</span></td></tr>
+              {{ end }}
+	      {{ range .Undocumented }} 
+              <tr><td>Document <a href="#{{ .Id }}">{{ . }}</a></td><td><span class="label label-success">+{{ printf "%.2f" ($stats.Increase .Kind) }}%</span></td></tr>
+              {{ end }}
+            </tbody>
+          </table>
+        </div>
+      {{ end }}
+    {{ end }}
     {{ $doc := .Doc }}
     {{ with .Synopsis }}
       <h2>Overview</h2>

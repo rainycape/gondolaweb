@@ -14,16 +14,9 @@ function scrollPosition(pos, animated) {
     return $(document).scrollTop();
 }
 
-$(function () {
-    if (window.location.hash) {
-        var el = $(window.location.hash);
-        if (el.length) {
-            setTimeout(function () {
-                scrollTo(el);
-            }, 0);
-        }
-    }
-    $('a').each(function () {
+function setupHashAnchors(el) {
+    el = el || $(document);
+    el.find('a').each(function () {
         var a = $(this);
         var href = a.attr('href');
         if (href && href[0] == '#' && href != "#") {
@@ -39,6 +32,18 @@ $(function () {
             });
         }
     });
+}
+
+$(function () {
+    $("[data-toggle='tooltip']").tooltip(); 
+    if (window.location.hash) {
+        var el = $(window.location.hash);
+        if (el.length) {
+            setTimeout(function () {
+                scrollTo(el);
+            }, 0);
+        }
+    }
     $('a.slide-up').click(function () {
         var div = $(this).parents('h2').first().next();
         if (div.is(':visible')) {
@@ -47,6 +52,31 @@ $(function () {
             div.slideDown();
         }
         $(this).toggleClass('inverted');
+        return false;
+    });
+    $('a[rel="popover"]').click(function () {
+        var a = $(this);
+        if (a.data('popover')) {
+            a.popover('destroy');
+            a.data('popover', false);
+            $('body').off('click.popover');
+        } else {
+            var target = $(a.attr('href')).clone();
+            target.attr('id', null);
+            a.popover({
+                html: true,
+                placement: 'auto',
+                content: target.html(),
+                trigger: 'manual'
+            });
+            a.popover('show');
+            a.data('popover', true);
+            $('body').on('click.popover', function (e) {
+                if (a.has(e.target).length === 0 && $('.popover').has(e.target).length === 0) {
+                    a.click();
+                }
+            });
+        }
         return false;
     });
 });

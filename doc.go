@@ -41,6 +41,102 @@ func buildContext() *build.Context {
 	return &ctx
 }
 
+type UndocumentedKind int
+
+const (
+	Const UndocumentedKind = iota + 1
+	Var
+	Func
+	Type
+	Method
+)
+
+const (
+	valueScore = 1
+	funcScore  = 2
+	typeScore  = 3
+)
+
+func (k UndocumentedKind) Score() int {
+	switch k {
+	case Const, Var:
+		return valueScore
+	case Func, Method:
+		return funcScore
+	case Type:
+		return typeScore
+	}
+	panic("unreachable")
+}
+
+type Undocumented struct {
+	Kind UndocumentedKind
+	Name string
+	Type string
+}
+
+func (u *Undocumented) String() string {
+	switch u.Kind {
+	case Const:
+		return "constant " + u.Name
+	case Var:
+		return "variable " + u.Name
+	case Func:
+		return "function " + u.Name
+	case Type:
+		return "type " + u.Name
+	case Method:
+		return "method (" + u.Type + ") " + u.Name
+	}
+	return "invalid Undocumented"
+}
+
+func (u *Undocumented) Id() string {
+	switch u.Kind {
+	case Const:
+		return ConstId(u.Name)
+	case Var:
+		return VarId(u.Name)
+	case Func:
+		return FuncId(u.Name)
+	case Type:
+		return TypeId(u.Name)
+	case Method:
+		return MethodId(u.Type, u.Name)
+	}
+	return ""
+}
+
+type DocStats struct {
+	// Always <= TopScore
+	Score int
+	// The maximum achievable score by this package
+	TopScore int
+	// Indicates if the package has documentation.
+	// Weight if this value is indicate by DocScore().
+	HasDoc       bool
+	Undocumented []*Undocumented
+}
+
+func (d *DocStats) DocScore() int {
+	return 10
+}
+
+func (d *DocStats) NormalizedScore() int {
+	if d.TopScore == 0 {
+		return 0
+	}
+	s := int(float64(100-d.DocScore()) * float64(d.Score) / float64(d.TopScore))
+	if d.HasDoc {
+		s += d.DocScore()
+	}
+	return s
+}
+
+func (d *DocStats) Increase(k UndocumentedKind) float64 {
+	return float64(float64(k.Score())*float64(100-d.DocScore())) / float64(d.TopScore)
+}
+
 type Package struct {
 	ctx      *mux.Context
 	fset     *token.FileSet
@@ -59,13 +155,13 @@ func (p *Package) symbolHref(symbol string) string {
 	if obj := p.apkg.Scope.Objects[key]; obj != nil {
 		switch obj.Kind {
 		case ast.Typ:
-			return "#type-" + key
+			return "#" + TypeId(key)
 		case ast.Fun:
-			return "#func-" + key
+			return "#" + FuncId(key)
 		case ast.Con:
-			return "#const-" + key
+			return "#" + ConstId(key)
 		case ast.Var:
-			return "#var-" + key
+			return "#" + VarId(key)
 		}
 	}
 	if dot := strings.IndexByte(key, '.'); dot > 0 {
@@ -76,7 +172,7 @@ func (p *Package) symbolHref(symbol string) string {
 				if v.Name == tn {
 					for _, m := range v.Methods {
 						if m.Name == fn {
-							return "#type-" + tn + "-method-" + fn
+							return "#" + MethodId(fn, fn)
 						}
 					}
 					return ""
@@ -207,6 +303,92 @@ func (p *Package) Synopsis() string {
 	return ""
 }
 
+func (p *Package) valueStats(k UndocumentedKind, values []*doc.Value, stats *DocStats, total *int, score *int) {
+	for _, v := range values {
+		if v.Doc != "" {
+			// There's a comment just before the declaration.
+			// Consider all the values documented
+			c := len(v.Decl.Specs) * valueScore
+			*score += c
+			*total += c
+		} else {
+			// Check every value declared in this group
+			for _, spec := range v.Decl.Specs {
+				*total += valueScore
+				s := spec.(*ast.ValueSpec)
+				if s.Doc != nil || s.Comment != nil {
+					*score += valueScore
+				} else {
+					for _, n := range s.Names {
+						stats.Undocumented = append(stats.Undocumented, &Undocumented{
+							Kind: k,
+							Name: astutil.Ident(n),
+						})
+					}
+				}
+			}
+		}
+	}
+}
+
+func (p *Package) funcStats(typ string, fns []*doc.Func, stats *DocStats, total *int, score *int) {
+	for _, v := range fns {
+		// Skip Error() and String() methods
+		if typ != "" && (v.Name == "String" || v.Name == "Error") {
+			continue
+		}
+		*total += funcScore
+		if v.Doc != "" {
+			*score += funcScore
+		} else {
+			und := &Undocumented{
+				Kind: Func,
+				Name: v.Name,
+			}
+			if typ != "" {
+				und.Type = typ
+				und.Kind = Method
+			}
+			stats.Undocumented = append(stats.Undocumented, und)
+		}
+	}
+}
+
+func (p *Package) typeStats(typs []*doc.Type, stats *DocStats, total *int, score *int) {
+	for _, v := range typs {
+		*total += typeScore
+		if v.Doc != "" {
+			*score += typeScore
+		} else {
+			stats.Undocumented = append(stats.Undocumented, &Undocumented{
+				Kind: Type,
+				Name: v.Name,
+			})
+		}
+		p.valueStats(Const, v.Consts, stats, total, score)
+		p.valueStats(Var, v.Vars, stats, total, score)
+		p.funcStats("", v.Funcs, stats, total, score)
+		p.funcStats(v.Name, v.Methods, stats, total, score)
+	}
+}
+
+func (p *Package) DocStats() *DocStats {
+	if p.dpkg == nil {
+		return nil
+	}
+	stats := new(DocStats)
+	total := 0
+	score := 0
+	stats.HasDoc = p.dpkg.Doc != ""
+	p.valueStats(Const, p.dpkg.Consts, stats, &total, &score)
+	p.valueStats(Var, p.dpkg.Vars, stats, &total, &score)
+	p.funcStats("", p.dpkg.Funcs, stats, &total, &score)
+	p.typeStats(p.dpkg.Types, stats, &total, &score)
+	stats.Score = score
+	stats.TopScore = total
+	return stats
+}
+
 func (p *Package) Filenames() []string {
 	if b := p.bpkg; b != nil {
 		var files []string
@@ -304,9 +486,9 @@ func (p *Package) HTMLDecl(node interface{}) (template.HTML, error) {
 		s = buf.String()
 	}
 	if strings.HasPrefix(s, "const ") {
-		s = valueRe.ReplaceAllString(s, "<span id=\"const-${1}\">${1}</span>${2}")
+		s = valueRe.ReplaceAllString(s, "<span id=\""+constPrefix+"${1}\">${1}</span>${2}")
 	} else if strings.HasPrefix(s, "var ") {
-		s = valueRe.ReplaceAllString(s, "<span id=\"var-${1}\">${1}</span>${2}")
+		s = valueRe.ReplaceAllString(s, "<span id=\""+varPrefix+"${1}\">${1}</span>${2}")
 	}
 	return template.HTML(s), err
 }
