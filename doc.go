@@ -459,7 +459,7 @@ func DocHandler(ctx *mux.Context) {
 			panic(err)
 		}
 	}
-	title := "Package " + pkg.Name()
+	title := "Package " + pkg.ImportPath()
 	breadcrumbs := []*Breadcrumb{
 		{Title: "Index", Href: ctx.MustReverse("doc-list")},
 	}
@@ -478,7 +478,7 @@ func DocHandler(ctx *mux.Context) {
 		ii = end + 1
 	}
 	data := map[string]interface{}{
-		"HeaderTitle": title,
+		"HeaderTitle": "Package " + pkg.Name(),
 		"Subtitle":    title,
 		"Section":     "docs",
 		"Breadcrumbs": breadcrumbs,
