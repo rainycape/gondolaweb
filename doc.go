@@ -50,12 +50,14 @@ const (
 	Func
 	Type
 	Method
+	Field
 )
 
 const (
 	valueScore = 1
 	funcScore  = 2
 	typeScore  = 3
+	fieldScore = 1
 )
 
 func (k UndocumentedKind) Score() int {
@@ -66,6 +68,8 @@ func (k UndocumentedKind) Score() int {
 		return funcScore
 	case Type:
 		return typeScore
+	case Field:
+		return fieldScore
 	}
 	panic("unreachable")
 }
@@ -88,6 +92,8 @@ func (u *Undocumented) String() string {
 		return "type " + u.Name
 	case Method:
 		return "method (" + u.Type + ") " + u.Name
+	case Field:
+		return "field " + u.Name + " on type " + u.Type
 	}
 	return "invalid Undocumented"
 }
@@ -104,6 +110,8 @@ func (u *Undocumented) Id() string {
 		return TypeId(u.Name)
 	case Method:
 		return MethodId(u.Type, u.Name)
+	case Field:
+		return TypeId(u.Type)
 	}
 	return ""
 }
@@ -365,6 +373,36 @@ func (p *Package) typeStats(typs []*doc.Type, stats *DocStats, total *int, score
 				Kind: Type,
 				Name: v.Name,
 			})
+		}
+		// Fields
+		ts := v.Decl.Specs[0].(*ast.TypeSpec)
+		switch s := ts.Type.(type) {
+		case *ast.StructType:
+			for _, f := range s.Fields.List {
+				*total += fieldScore
+				if f.Doc != nil || f.Comment != nil {
+					*score += fieldScore
+				} else {
+					var name string
+					if len(f.Names) > 0 {
+						name = astutil.Ident(f.Names[0])
+					} else {
+						// Embedded field
+						name = astutil.Ident(f.Type)
+						if name[0] == '*' {
+							name = name[1:]
+						}
+						if dot := strings.IndexByte(name, '.'); dot >= 0 {
+							name = name[dot+1:]
+						}
+					}
+					stats.Undocumented = append(stats.Undocumented, &Undocumented{
+						Kind: Field,
+						Name: name,
+						Type: v.Name,
+					})
+				}
+			}
 		}
 		p.valueStats(Const, v.Consts, stats, total, score)
 		p.valueStats(Var, v.Vars, stats, total, score)
