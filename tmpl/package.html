@@ -14,7 +14,7 @@
   {{ $p := .Package }}
   {{ range .Values }}
     <pre class="doc">{{ $p.HTMLDecl .Decl }}</pre>
-    {{ $p.ScopedHTML .Doc (index .Names 0) }}</p>
+    {{ $p.ScopedHTML .Doc .Decl }}</p>
   {{ end }}
 {{ end }}
 
@@ -27,7 +27,7 @@
       <a class="doc-anchor" href="{{ reverse "source" ($p.Position .Decl) }}">{{ fa "external-link" }}</a>
     </h4>
     <pre class="doc">{{ $p.HTMLDecl .Decl }}</pre>
-    {{ $p.ScopedHTML .Doc .Name }}</p>
+    {{ $p.ScopedHTML .Doc .Decl }}</p>
   {{ end }}
 {{ end }}
 
@@ -124,7 +124,7 @@
               <a class="doc-anchor" href="{{ reverse "source" ($package.Position .Decl) }}">{{ fa "external-link" }}</a>
             </h3>
             <pre class="doc">{{ $package.HTMLDecl .Decl }}</pre>
-            {{ $package.ScopedHTML .Doc .Name }}
+            {{ $package.ScopedHTML .Doc .Decl }}
             {{ template "values" map "Package" $package "Values" .Consts }}
             {{ template "values" map "Package" $package "Values" .Vars }}
             {{ template "funcs" map "Package" $package "Funcs" .Funcs }}
@@ -142,7 +142,7 @@
               <a class="doc-anchor" href="{{ reverse "source" ($package.Position .Decl) }}">{{ fa "external-link" }}</a>
             </h3>
             <pre class="doc">{{ $package.HTMLDecl .Decl }}</pre>
-            {{ $package.ScopedHTML .Doc .Name }}
+            {{ $package.ScopedHTML .Doc .Decl }}
           {{ end }}
         </div>
       {{ end }}

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"gnd.la/mux"
 	"gnd.la/util"
+	"gnd.la/util/astutil"
 	"gnd.la/util/pkgutil"
 	"go/ast"
 	"go/build"
@@ -133,7 +134,7 @@ func (p *Package) href(word string, scope string) string {
 
 func (p *Package) writeWord(bw *bufio.Writer, buf *bytes.Buffer, scope string, ignored map[string]struct{}) {
 	if word := buf.String(); word != "" {
-		if _, ign := ignored[word]; ign || word == scope {
+		if _, ign := ignored[word]; ign {
 			bw.WriteString(word)
 		} else {
 			if href := p.href(word, scope); href != "" {
@@ -239,20 +240,55 @@ func (p *Package) Doc() *doc.Package {
 	return p.dpkg
 }
 
-func (p *Package) html(text string, scope string) template.HTML {
+func (p *Package) html(text string, scope string, ignored map[string]struct{}) template.HTML {
 	var buf bytes.Buffer
 	doc.ToHTML(&buf, text, nil)
 	var out bytes.Buffer
-	p.linkify(&out, buf.String(), scope, nil)
+	p.linkify(&out, buf.String(), scope, ignored)
 	return template.HTML(out.String())
 }
 
 func (p *Package) HTML(text string) template.HTML {
-	return p.html(text, "")
+	return p.html(text, "", nil)
 }
 
-func (p *Package) ScopedHTML(text string, scope string) template.HTML {
-	return p.html(text, scope)
+func (p *Package) scopeParameters(node interface{}) (string, map[string]struct{}) {
+	var scope string
+	var ignored map[string]struct{}
+	ignore := func(x string) {
+		if ignored == nil {
+			ignored = make(map[string]struct{})
+		}
+		ignored[x] = struct{}{}
+	}
+	switch n := node.(type) {
+	case *ast.FuncDecl:
+		ignore(n.Name.Name)
+		if n.Recv != nil {
+			scope = astutil.Ident(n.Recv.List[0].Type)
+			if scope != "" && scope[0] == '*' {
+				scope = scope[1:]
+			}
+		}
+	case *ast.GenDecl:
+		for _, spec := range n.Specs {
+			switch s := spec.(type) {
+			case *ast.TypeSpec:
+				scope = s.Name.Name
+				ignore(scope)
+			case *ast.ValueSpec:
+				for _, name := range s.Names {
+					ignore(name.Name)
+				}
+			}
+		}
+	}
+	return scope, ignored
+}
+
+func (p *Package) ScopedHTML(text string, scope interface{}) template.HTML {
+	name, ignored := p.scopeParameters(scope)
+	return p.html(text, name, ignored)
 }
 
 func (p *Package) HTMLDoc() template.HTML {
@@ -262,31 +298,9 @@ func (p *Package) HTMLDoc() template.HTML {
 func (p *Package) HTMLDecl(node interface{}) (template.HTML, error) {
 	s, err := FormatNode(p.fset, node)
 	if err == nil {
-		var scope string
-		var ignored map[string]struct{}
-		ignore := func(x string) {
-			if ignored == nil {
-				ignored = make(map[string]struct{})
-			}
-			ignored[x] = struct{}{}
-		}
-		switch n := node.(type) {
-		case *ast.FuncDecl:
-			scope = n.Name.Name
-		case *ast.GenDecl:
-			for _, spec := range n.Specs {
-				switch s := spec.(type) {
-				case *ast.TypeSpec:
-					scope = s.Name.Name
-				case *ast.ValueSpec:
-					for _, name := range s.Names {
-						ignore(name.Name)
-					}
-				}
-			}
-		}
+		name, ignored := p.scopeParameters(node)
 		var buf bytes.Buffer
-		p.linkify(&buf, s, scope, ignored)
+		p.linkify(&buf, s, name, ignored)
 		s = buf.String()
 	}
 	if strings.HasPrefix(s, "const ") {
