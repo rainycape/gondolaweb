@@ -101,6 +101,9 @@ func (p *Package) href(word string, scope string) string {
 					return p.ctx.MustReverse("doc", pn) + sr
 				}
 			}
+			if pn == p.dpkg.Name {
+				return p.symbolHref(tn)
+			}
 		} else if _, err := buildContext().Import(word, "", build.FindOnly); err == nil {
 			return p.ctx.MustReverse("doc", word)
 		}
