@@ -33,6 +33,7 @@
 
 
 {{ define "content" }}
+<div class="pkg-doc">
 {{ with .Package }}
   {{ $package := . }}
   <div class="container">
@@ -189,4 +190,5 @@
     {{ end }}
   </div>
 {{ end }}
+</div>
 {{ end }}
