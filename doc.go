@@ -272,7 +272,7 @@ func (p *Package) linkify(w io.Writer, input string, scope string, ignored map[s
 		// so pointers get the link for the pointed type.
 		// Include ;, so escaped amperstands do not end up
 		// in the type names.
-		case ',', ' ', '\n', '\t', '(', ')', '*', '&', '{', '}', ';':
+		case ',', ' ', '\n', '\t', '(', ')', '*', '&', '{', '}', ';', '<', '>':
 			p.writeWord(bw, &buf, scope, ignored)
 			bw.WriteByte(c)
 			buf.Reset()
