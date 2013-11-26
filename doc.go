@@ -623,7 +623,7 @@ func ImportPackages(ctx *mux.Context, dir string) ([]*Package, error) {
 	}
 	for _, v := range files {
 		n := v.Name()
-		if n == "test_data" || n[0] == '.' || n[0] == '_' {
+		if n == "test_data" || n == "testdata" || n[0] == '.' || n[0] == '_' {
 			continue
 		}
 		abs := filepath.Join(dir, n)
