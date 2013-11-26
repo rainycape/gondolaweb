@@ -3,7 +3,6 @@ package main
 import (
 	"gnd.la/template"
 	"go/doc"
-	htemplate "html/template"
 	"strings"
 )
 
@@ -51,15 +50,10 @@ func typeId(typ *doc.Type) string {
 	return TypeId(typ.Name)
 }
 
-func fa(s string) htemplate.HTML {
-	return htemplate.HTML("<i class=\"fa fa-" + s + "\"></i>")
-}
-
 func init() {
 	template.AddFuncs(template.FuncMap{
 		"trim":    trim,
 		"func_id": funcId,
 		"type_id": typeId,
-		"fa":      fa,
 	})
 }
