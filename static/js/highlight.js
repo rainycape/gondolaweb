@@ -1,12 +1,9 @@
-$(function () {
-    var highlight = null;
-    var match = /#line\-(\d+)/g.exec(window.location.hash);
-    if (match) {
-        highlight = parseInt(match[1], 10); 
+function addLineLinks() {
+    var lines = $('.gutter .line');
+    if (!lines.length) {
+        return false;
     }
-    SyntaxHighlighter.all({toolbar: false, highlight:highlight});
-    setTimeout(function () {
-    $('.gutter .line').each(function () {
+    lines.each(function () {
         var div = $(this);
         if (div.hasClass('highlighted')) {
             scrollTo(div);
@@ -26,5 +23,19 @@ $(function () {
             return false;
         });
     });
-    }, 100);
+    return true;
+}
+
+$(function () {
+    var highlight = null;
+    var match = /#line\-(\d+)/g.exec(window.location.hash);
+    if (match) {
+        highlight = parseInt(match[1], 10);
+    }
+    SyntaxHighlighter.all({toolbar: false, highlight:highlight});
+    var ts = setInterval(function () {
+        if (addLineLinks()) {
+            clearInterval(ts);
+        }
+    }, 10);
 });
