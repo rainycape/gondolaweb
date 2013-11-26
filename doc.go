@@ -168,6 +168,9 @@ func (p *Package) symbolHref(symbol string) string {
 	if key[len(key)-1] == ')' && key[len(key)-2] == '(' {
 		key = key[:len(key)-2]
 	}
+	if key[len(key)-1] == '.' {
+		key = key[:len(key)-1]
+	}
 	if obj := p.apkg.Scope.Objects[key]; obj != nil {
 		switch obj.Kind {
 		case ast.Typ:
