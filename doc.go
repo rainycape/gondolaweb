@@ -42,117 +42,6 @@ func buildContext() *build.Context {
 	return &ctx
 }
 
-type UndocumentedKind int
-
-const (
-	Const UndocumentedKind = iota + 1
-	Var
-	Func
-	Type
-	Method
-	Field
-	IMethod
-)
-
-const (
-	valueScore = 1
-	funcScore  = 2
-	typeScore  = 3
-	fieldScore = 1
-)
-
-func (k UndocumentedKind) Score() int {
-	switch k {
-	case Const, Var:
-		return valueScore
-	case Func, Method, IMethod:
-		return funcScore
-	case Type:
-		return typeScore
-	case Field:
-		return fieldScore
-	case 0:
-		return 0
-	}
-	panic("unreachable")
-}
-
-type Undocumented struct {
-	Kind UndocumentedKind
-	Name string
-	Type string
-}
-
-func (u *Undocumented) String() string {
-	switch u.Kind {
-	case Const:
-		return "constant " + u.Name
-	case Var:
-		return "variable " + u.Name
-	case Func:
-		return "function " + u.Name
-	case Type:
-		return "type " + u.Name
-	case Method:
-		return "method (" + u.Type + ") " + u.Name
-	case Field:
-		return "field " + u.Name + " on type " + u.Type
-	case IMethod:
-		return "method " + u.Name + " on interface " + u.Type
-	}
-	return "invalid Undocumented"
-}
-
-func (u *Undocumented) Id() string {
-	switch u.Kind {
-	case Const:
-		return ConstId(u.Name)
-	case Var:
-		return VarId(u.Name)
-	case Func:
-		return FuncId(u.Name)
-	case Type:
-		return TypeId(u.Name)
-	case Method:
-		return MethodId(u.Type, u.Name)
-	case Field:
-		return TypeId(u.Type)
-	case IMethod:
-		return TypeId(u.Type)
-	}
-	return ""
-}
-
-type DocStats struct {
-	// Always <= TopScore
-	Score int
-	// The maximum achievable score by this package
-	TopScore int
-	// Indicates if the package has documentation.
-	// Weight if this value is indicate by DocScore().
-	HasDoc       bool
-	Undocumented []*Undocumented
-}
-
-func (d *DocStats) DocScore() int {
-	return 10
-}
-
-func (d *DocStats) NormalizedScore() int {
-	if d.TopScore == 0 {
-		return 0
-	}
-	s := int(float64(100-d.DocScore()) * float64(d.Score) / float64(d.TopScore))
-	if d.HasDoc {
-		s += d.DocScore()
-	}
-	return s
-}
-
-func (d *DocStats) Increase(k UndocumentedKind) float64 {
-	return float64(float64(k.Score())*float64(100-d.DocScore())) / float64(d.TopScore)
-}
-
 type Package struct {
 	ctx      *mux.Context
 	fset     *token.FileSet
@@ -322,128 +211,8 @@ func (p *Package) Synopsis() string {
 	return ""
 }
 
-func (p *Package) valueStats(k UndocumentedKind, values []*doc.Value, stats *DocStats, total *int, score *int) {
-	for _, v := range values {
-		if v.Doc != "" {
-			// There's a comment just before the declaration.
-			// Consider all the values documented
-			c := len(v.Decl.Specs) * valueScore
-			*score += c
-			*total += c
-		} else {
-			// Check every value declared in this group
-			for _, spec := range v.Decl.Specs {
-				*total += valueScore
-				s := spec.(*ast.ValueSpec)
-				if s.Doc != nil || s.Comment != nil {
-					*score += valueScore
-				} else {
-					for _, n := range s.Names {
-						stats.Undocumented = append(stats.Undocumented, &Undocumented{
-							Kind: k,
-							Name: astutil.Ident(n),
-						})
-					}
-				}
-			}
-		}
-	}
-}
-
-func (p *Package) funcStats(typ string, fns []*doc.Func, stats *DocStats, total *int, score *int) {
-	for _, v := range fns {
-		// Skip Error() and String() methods
-		if typ != "" && (v.Name == "String" || v.Name == "Error") {
-			continue
-		}
-		*total += funcScore
-		if v.Doc != "" {
-			*score += funcScore
-		} else {
-			und := &Undocumented{
-				Kind: Func,
-				Name: v.Name,
-			}
-			if typ != "" {
-				und.Type = typ
-				und.Kind = Method
-			}
-			stats.Undocumented = append(stats.Undocumented, und)
-		}
-	}
-}
-
-func (p *Package) typeStats(typs []*doc.Type, stats *DocStats, total *int, score *int) {
-	for _, v := range typs {
-		*total += typeScore
-		if v.Doc != "" {
-			*score += typeScore
-		} else {
-			stats.Undocumented = append(stats.Undocumented, &Undocumented{
-				Kind: Type,
-				Name: v.Name,
-			})
-		}
-		// Fields
-		var k UndocumentedKind
-		ts := v.Decl.Specs[0].(*ast.TypeSpec)
-		var fields []*ast.Field
-		switch s := ts.Type.(type) {
-		case *ast.StructType:
-			fields = s.Fields.List
-			k = Field
-		case *ast.InterfaceType:
-			fields = s.Methods.List
-			k = IMethod
-		}
-		fs := k.Score()
-		for _, f := range fields {
-			*total += fs
-			if f.Doc != nil || f.Comment != nil {
-				*score += fs
-			} else {
-				var name string
-				if len(f.Names) > 0 {
-					name = astutil.Ident(f.Names[0])
-				} else {
-					// Embedded field
-					name = astutil.Ident(f.Type)
-					if name[0] == '*' {
-						name = name[1:]
-					}
-					if dot := strings.IndexByte(name, '.'); dot >= 0 {
-						name = name[dot+1:]
-					}
-				}
-				stats.Undocumented = append(stats.Undocumented, &Undocumented{
-					Kind: k,
-					Name: name,
-					Type: v.Name,
-				})
-			}
-		}
-		p.valueStats(Const, v.Consts, stats, total, score)
-		p.valueStats(Var, v.Vars, stats, total, score)
-		p.funcStats("", v.Funcs, stats, total, score)
-		p.funcStats(v.Name, v.Methods, stats, total, score)
-	}
-}
-
-func (p *Package) DocStats() *DocStats {
-	if p.dpkg == nil {
-		return nil
-	}
-	stats := new(DocStats)
-	total := 0
-	score := 0
-	stats.HasDoc = p.dpkg.Doc != ""
-	p.valueStats(Const, p.dpkg.Consts, stats, &total, &score)
-	p.valueStats(Var, p.dpkg.Vars, stats, &total, &score)
-	p.funcStats("", p.dpkg.Funcs, stats, &total, &score)
-	p.typeStats(p.dpkg.Types, stats, &total, &score)
-	stats.Score = score
-	stats.TopScore = total
-	return stats
+func (p *Package) Stats() (*Stats, error) {
+	return NewStats(p)
 }
 
 func (p *Package) Filenames() []string {
@@ -458,9 +227,16 @@ func (p *Package) Filenames() []string {
 	return nil
 }
 
-func (p *Package) Position(n ast.Node) string {
+func (p *Package) ReversePos(n ast.Node) string {
 	pos := p.fset.Position(n.Pos())
+	return p.ReversePosition(pos)
+}
+
+func (p *Package) ReversePosition(pos token.Position) string {
 	filename := pos.Filename
+	if filepath.Base(filename) == filename {
+		filename = filepath.Join(p.bpkg.Dir, filename)
+	}
 	if strings.HasPrefix(filename, srcDir) {
 		filename = filename[len(srcDir)+1:]
 	}
@@ -468,7 +244,8 @@ func (p *Package) Position(n ast.Node) string {
 		// Skip the src/ after GOROOT
 		filename = "go" + filename[len(gr)+4:]
 	}
-	return fmt.Sprintf("%s#line-%d", filename, pos.Line)
+	loc := fmt.Sprintf("%s#line-%d", filename, pos.Line)
+	return p.ctx.MustReverse("source", loc)
 }
 
 func (p *Package) HasDoc() bool {

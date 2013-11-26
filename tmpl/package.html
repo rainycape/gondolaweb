@@ -24,7 +24,7 @@
     {{ $id := func_id . }}
     <h4 id="{{ $id }}">func {{ with .Recv }}({{ . }}) {{ end }}{{ .Name }}
       <a class="doc-anchor" href="#{{ $id }}">{{ fa "link" }}</a>
-      <a class="doc-anchor" href="{{ reverse "source" ($p.Position .Decl) }}">{{ fa "external-link" }}</a>
+      <a class="doc-anchor" href="{{ $p.ReversePos .Decl }}">{{ fa "external-link" }}</a>
     </h4>
     <pre class="doc">{{ $p.HTMLDecl .Decl }}</pre>
     {{ $p.ScopedHTML .Doc .Decl }}</p>
@@ -39,28 +39,42 @@
     {{ if .ImportPath }}
       <p>
         <span class="import">import "{{ .ImportPath }}"</span>
-        {{ $stats := .DocStats }}
+        {{ $stats := .Stats }}
         {{ with $stats }}
-          {{ $p := .NormalizedScore }}
-          <span data-toggle="tooltip" title="Documentation Score" class="label label-{{ if lt $p 25 }}danger{{ else if lt $p 50 }}warning{{ else if lt $p 75 }}info{{ else }}success{{ end }}">{{ $p }}%</span>
-          {{ if .Undocumented }}
-            <a class="show-undocumented" href="#pkg-undocumented" rel="popover">Improve this!</a>
+          {{ $s := .Score }}
+          <a href="javascript:void(0);" data-toggle="tooltip" title="Package Score" class="label label-{{ if lt $s 25.0 }}danger{{ else if lt $s 50.0 }}warning{{ else if lt $s 75.0 }}info{{ else }}success{{ end }}">{{ printf "%.2f" $s }}%</a>
+          {{ with .Problems }}
+            <a rel="popover" href="#pkg-issues" class="label label-danger">{{ with len . }}{{ . }} {{ $Ctx.Tn "issue" "issues" . }}{{ end }}</a>
+          {{ end }}
+          {{ if lt $s 100.0 }}
+            <a class="show-undocumented" href="#pkg-improvements" rel="popover">Improve this!</a>
           {{ end }}
         {{ end }}
       </p>
       {{ with $stats }}
-        <div id="pkg-undocumented" class="pkg-undocumented">
+        <div id="pkg-improvements" class="doc-popover" data-title="Improve {{ $package.ImportPath }} score">
           <table class="table table-striped">
             <tbody>
               {{ if not .HasDoc }}
-              <tr><td>Write this package's <a href="http://blog.golang.org/godoc-documenting-go-code">documentation</a></td><td><span class="label label-success">+{{ .DocScore }}%</span></td></tr>
+                <tr><td>Write this package's <a href="http://blog.golang.org/godoc-documenting-go-code">documentation</a></td><td><span class="label label-success">+{{ .NoDocPenalty }}%</span></td></tr>
               {{ end }}
 	      {{ range .Undocumented }} 
-              <tr><td>Document <a href="#{{ .Id }}">{{ . }}</a></td><td><span class="label label-success">+{{ printf "%.2f" ($stats.Increase .Kind) }}%</span></td></tr>
+                <tr><td><a href="#{{ .Id }}">{{ . }}</a></td><td><span class="label label-success">+{{ printf "%.2f" ($stats.Increase .Kind) }}%</span></td></tr>
               {{ end }}
             </tbody>
           </table>
         </div>
+        {{ with .Problems }}
+          <div id="pkg-issues" class="doc-popover" data-title="Issues detected">
+            <table class="table table-striped">
+              <tbody>
+                {{ range . }}
+                  <tr><td><a href="{{ $package.ReversePosition .Position }}">{{ with .Position }}{{ .Filename }}:{{ .Line }}{{ end }}</a></td><td>{{ .Text }}</td></tr>
+                {{ end }}
+              </tbody>
+            </table>
+          </div>
+        {{ end }}
       {{ end }}
     {{ end }}
     {{ $doc := .Doc }}
@@ -147,7 +161,7 @@
             {{ $id := type_id . }}
             <h3 id="{{ $id }}">type {{ .Name }}
               <a class="doc-anchor" href="#{{ $id }}">{{ fa "link" }}</a>
-              <a class="doc-anchor" href="{{ reverse "source" ($package.Position .Decl) }}">{{ fa "external-link" }}</a>
+              <a class="doc-anchor" href="{{ $package.ReversePos .Decl }}">{{ fa "external-link" }}</a>
             </h3>
             <pre class="doc">{{ $package.HTMLDecl .Decl }}</pre>
             {{ $package.ScopedHTML .Doc .Decl }}
@@ -165,7 +179,7 @@
             {{ $id := func_id . }}
             <h3 id="{{ $id }}">func {{ .Name }}
               <a class="doc-anchor" href="#{{ $id }}">{{ fa "link" }}</a>
-              <a class="doc-anchor" href="{{ reverse "source" ($package.Position .Decl) }}">{{ fa "external-link" }}</a>
+              <a class="doc-anchor" href="{{ $package.ReversePos .Decl }}">{{ fa "external-link" }}</a>
             </h3>
             <pre class="doc">{{ $package.HTMLDecl .Decl }}</pre>
             {{ $package.ScopedHTML .Doc .Decl }}

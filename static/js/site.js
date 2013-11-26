@@ -22,7 +22,7 @@ function setupHashAnchors(el) {
         if (href && href[0] == '#' && href != "#") {
             a.click(function () {
                 var target = $($(this).attr('href'));
-                if (target.length) {
+                if (target.length && target.is(':visible')) {
                     var pos = scrollPosition();
                     window.location.hash = $(this).attr('href');
                     scrollPosition(pos);
@@ -64,6 +64,7 @@ $(function () {
             var target = $(a.attr('href')).clone();
             target.attr('id', null);
             a.popover({
+                title: target.data('title'),
                 html: true,
                 placement: 'auto',
                 content: target.html(),

@@ -109,7 +109,16 @@ a, h1, h2, h3, h4, h5, h6 {
     border: 1px solid #ccc;
     border-radius: 4px;
     padding: 4px 4px 4px 0;
-    overflow: scroll;
+
+    .code {
+        .container {
+            overflow: scroll;
+        }
+        .line {
+            white-space: pre;
+            display: table;
+        }
+    }
 
     code {
         border-radius: 0;
@@ -190,7 +199,7 @@ h1, h2, h3, h4, h5, h5 {
     color: darken(#5cb85c, 15%);
 }
 
-#pkg-undocumented {
+.doc-popover {
     display: none;
     table.table {
         width: auto;
