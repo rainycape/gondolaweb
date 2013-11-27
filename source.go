@@ -1,7 +1,11 @@
 package main
 
 import (
+	"bytes"
+	"fmt"
+	"gnd.la/html"
 	"gnd.la/mux"
+	"html/template"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -19,6 +23,7 @@ var (
 		".hpp":  "cpp",
 		".hxx":  "cpp",
 		".js":   "js",
+		".md":   "markdown",
 		".sh":   "sh",
 		".bash": "sh",
 	}
@@ -52,10 +57,11 @@ func SourceHandler(ctx *mux.Context) {
 		})
 		ii = end + 1
 	}
-	var template string
+	var tmpl string
 	var title string
 	var files []string
-	var code string
+	var code template.HTML
+	var lines []int
 	if info.IsDir() {
 		if rel != "" && rel[len(rel)-1] != '/' {
 			ctx.MustRedirectReverse(true, "source", rel+"/")
@@ -71,15 +77,30 @@ func SourceHandler(ctx *mux.Context) {
 			}
 		}
 		title = "Directory " + filepath.Base(rel)
-		template = "dir.html"
+		tmpl = "dir.html"
 	} else {
 		contents, err := ioutil.ReadFile(path)
 		if err != nil {
 			panic(err)
 		}
 		title = "File " + filepath.Base(rel)
-		code = string(contents)
-		template = "source.html"
+		var buf bytes.Buffer
+		buf.WriteString("<span id=\"line-1\">")
+		last := 0
+		line := 1
+		for ii, v := range contents {
+			if v == '\n' {
+				buf.WriteString(html.Escape(string(contents[last:ii])))
+				lines = append(lines, line)
+				last = ii
+				line++
+				buf.WriteString(fmt.Sprintf("</span><span id=\"line-%d\">", line))
+			}
+		}
+		buf.Write(contents[last:])
+		buf.WriteString("</span>")
+		code = template.HTML(buf.String())
+		tmpl = "source.html"
 	}
 	data := map[string]interface{}{
 		"Sections":    "docs",
@@ -88,7 +109,8 @@ func SourceHandler(ctx *mux.Context) {
 		"Breadcrumbs": breadcrumbs,
 		"Files":       files,
 		"Code":        code,
+		"Lines":       lines,
 		"Highlighter": highlighters[filepath.Ext(rel)],
 	}
-	ctx.MustExecute(template, data)
+	ctx.MustExecute(tmpl, data)
 }

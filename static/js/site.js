@@ -34,9 +34,7 @@ function setupHashAnchors(el) {
     });
 }
 
-$(function () {
-    $("[data-toggle='tooltip']").tooltip(); 
-    setupHashAnchors();
+function scrollToHash() {
     if (window.location.hash) {
         var el = $(window.location.hash);
         if (el.length) {
@@ -45,6 +43,12 @@ $(function () {
             }, 0);
         }
     }
+}
+
+$(function () {
+    $("[data-toggle='tooltip']").tooltip(); 
+    setupHashAnchors();
+    scrollToHash();
     $('a.slide-up').click(function () {
         var div = $(this).parents('h2').first().next();
         if (div.is(':visible')) {
