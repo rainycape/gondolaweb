@@ -22,7 +22,7 @@
   {{ $p := .Package }}
   {{ range .Funcs }}
     {{ $id := func_id . }}
-    <h4 id="{{ $id }}">func {{ with .Recv }}({{ . }}) {{ end }}{{ .Name }}
+    <h4 id="{{ $id }}">func {{ func_name .Decl }}
       <a class="doc-anchor" href="#{{ $id }}">{{ fa "link" }}</a>
       <a class="doc-anchor" href="{{ $p.ReversePos .Decl }}">{{ fa "external-link" }}</a>
     </h4>
@@ -38,29 +38,50 @@
   {{ $package := . }}
   <div class="container">
     {{ if .ImportPath }}
-      <p>
+      <div>
         <span class="import">import "{{ .ImportPath }}"</span>
         {{ $stats := .Stats }}
         {{ with $stats }}
-          {{ $s := .Score }}
-          <a href="javascript:void(0);" data-toggle="tooltip" title="Package Score" class="label label-{{ if lt $s 25.0 }}danger{{ else if lt $s 50.0 }}warning{{ else if lt $s 75.0 }}info{{ else }}success{{ end }}">{{ printf "%.2f" $s }}%</a>
-          {{ with .Problems }}
-            <a rel="popover" href="#pkg-issues" class="label label-danger">{{ with len . }}{{ . }} {{ $Ctx.Tn "issue" "issues" . }}{{ end }}</a>
-          {{ end }}
-          {{ if lt $s 100.0 }}
-            <a class="show-undocumented" href="#pkg-improvements" rel="popover">Improve this!</a>
-          {{ end }}
+          <div class="pull-right">
+            {{ $p := .DocumentedPercentage }}
+            <a class="shield"{{ if lt $p 100.0 }} rel="popover" href="#pkg-undocumented"{{ end }}>
+              <span class="shield-label">
+                docs
+              </span>
+              <span class="shield-status {{ documented_color $p }}">
+                {{ printf "%.2f" $p }}%
+              </span>
+            </a>
+            {{ $ic := len .Problems }}
+            <a class="shield"{{ if $ic }} rel="popover" href="#pkg-issues"{{ end }}>
+              <span class="shield-label">
+                issues
+              </span>
+              <span class="shield-status {{ issues_color $ic }}">
+                {{ with $ic }}{{ . }}{{ else }}none{{ end }}
+              </span>
+            </a>
+            {{ $c := .AverageComplexity }}
+            <a class="shield" rel="popover" href="#pkg-complexities">
+              <span class="shield-label">
+                 complexity
+              </span>
+              <span class="shield-status {{ complexity_color $c }}">
+                {{ printf "%.2f" $c }}
+              </span>
+            </a>
+          </div>
         {{ end }}
-      </p>
+      </div>
       {{ with $stats }}
-        <div id="pkg-improvements" class="doc-popover" data-title="Improve {{ $package.ImportPath }} score">
+        <div id="pkg-undocumented" class="doc-popover" data-title="To Document">
           <table class="table table-striped">
             <tbody>
               {{ if not .HasDoc }}
-                <tr><td>Write this package's <a href="http://blog.golang.org/godoc-documenting-go-code">documentation</a></td><td><span class="label label-success">+{{ .NoDocPenalty }}%</span></td></tr>
+                <tr><td>The package's <a href="http://blog.golang.org/godoc-documenting-go-code">documentation</a></td><td><span class="label label-success">+{{ .NoDocPenalty }}%</span></td></tr>
               {{ end }}
 	      {{ range .Undocumented }} 
-                <tr><td><a href="#{{ .Id }}">{{ . }}</a></td><td><span class="label label-success">+{{ printf "%.2f" ($stats.Increase .Kind) }}%</span></td></tr>
+                <tr><td><a href="#{{ .Id }}">{{ . }}</a></td><td><span class="label label-success">+{{ printf "%.2f" ($stats.DocumentedIncrease .Kind) }}%</span></td></tr>
               {{ end }}
             </tbody>
           </table>
@@ -71,6 +92,20 @@
               <tbody>
                 {{ range . }}
                   <tr><td><a href="{{ $package.ReversePosition .Position }}">{{ with .Position }}{{ .Filename }}:{{ .Line }}{{ end }}</a></td><td>{{ .Text }}</td></tr>
+                {{ end }}
+              </tbody>
+            </table>
+          </div>
+        {{ end }}
+        {{ with .SortedComplexities }}
+          <div id="pkg-complexities" class="doc-popover" data-title="Cyclomatic Complexities">
+            <table class="table table-striped">
+              <tbody>
+                {{ range . }}
+                <tr>
+                    <td>{{ with .Func }}<a href="{{ $package.FuncLink . }}">{{ func_name . }}</a>{{ end }}</td>
+                    <td>{{ with .Complexity }}<span class="label label-{{ bootstrap_color (complexity_color .) }}">{{ . }}</span>{{ end }}</td>
+                </tr>
                 {{ end }}
               </tbody>
             </table>

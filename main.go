@@ -1,6 +1,7 @@
 package main
 
 import (
+	"doc"
 	"gnd.la/admin"
 	_ "gnd.la/bootstrap"
 	"gnd.la/config"
@@ -23,6 +24,10 @@ type Breadcrumb struct {
 }
 
 func main() {
+	doc.SourceDir = util.RelativePath("src")
+	doc.Context.GOPATH = util.RelativePath(".")
+	doc.SourceHandlerPrefix = "/doc/src/"
+	doc.DocHandlerPrefix = "/doc/pkg/"
 	config.MustParse(&Config)
 	StartUpdatingRepos()
 	m := mux.New()

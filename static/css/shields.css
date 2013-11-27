@@ -1,0 +1,75 @@
+.shield, .shield:hover {
+    display: inline-block;
+    background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #aaaaaa), color-stop(10%, #5a5a5a), color-stop(96%, #3f3f3f), color-stop(100%, #2e2e2e));
+    background-image: -webkit-linear-gradient(top, #aaaaaa 0%, #5a5a5a 10%, #3f3f3f 96%, #2e2e2e 100%);
+    background-image: -moz-linear-gradient(top, #aaaaaa 0%, #5a5a5a 10%, #3f3f3f 96%, #2e2e2e 100%);
+    background-image: -o-linear-gradient(top, #aaaaaa 0%, #5a5a5a 10%, #3f3f3f 96%, #2e2e2e 100%);
+    background-image: linear-gradient(top, #aaaaaa 0%, #5a5a5a 10%, #3f3f3f 96%, #2e2e2e 100%);
+    font-size: 11px;
+    font-weight: bold;
+    font-family: arial;
+    color: #FFFFFF !important;
+    border-radius: 3px;
+}
+.shield span {
+    display: inline-block;
+    padding: 1px 6px 2px 6px;
+    text-shadow: 0px 1px 0px rgba(0, 0, 0, 0.3);
+}
+.shield .shield-status {
+    border-radius: 0px 3px 3px 0px;
+    background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #d6d6d6), color-stop(10%, #9f9f9f), color-stop(96%, #707070), color-stop(100%, #515151));
+    background-image: -webkit-linear-gradient(top, #d6d6d6 0%, #9f9f9f 10%, #707070 96%, #515151 100%);
+    background-image: -moz-linear-gradient(top, #d6d6d6 0%, #9f9f9f 10%, #707070 96%, #515151 100%);
+    background-image: -o-linear-gradient(top, #d6d6d6 0%, #9f9f9f 10%, #707070 96%, #515151 100%);
+    background-image: linear-gradient(top, #d6d6d6 0%, #9f9f9f 10%, #707070 96%, #515151 100%);
+}
+.shield .gray {
+    background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #aaaaaa), color-stop(10%, #5a5a5a), color-stop(96%, #3f3f3f), color-stop(100%, #2e2e2e));
+    background-image: -webkit-linear-gradient(top, #aaaaaa 0%, #5a5a5a 10%, #3f3f3f 96%, #2e2e2e 100%);
+    background-image: -moz-linear-gradient(top, #aaaaaa 0%, #5a5a5a 10%, #3f3f3f 96%, #2e2e2e 100%);
+    background-image: -o-linear-gradient(top, #aaaaaa 0%, #5a5a5a 10%, #3f3f3f 96%, #2e2e2e 100%);
+    background-image: linear-gradient(top, #aaaaaa 0%, #5a5a5a 10%, #3f3f3f 96%, #2e2e2e 100%);
+}
+.shield .lightgray, .shield .none {
+    background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #d6d6d6), color-stop(10%, #9f9f9f), color-stop(96%, #707070), color-stop(100%, #515151));
+    background-image: -webkit-linear-gradient(top, #d6d6d6 0%, #9f9f9f 10%, #707070 96%, #515151 100%);
+    background-image: -moz-linear-gradient(top, #d6d6d6 0%, #9f9f9f 10%, #707070 96%, #515151 100%);
+    background-image: -o-linear-gradient(top, #d6d6d6 0%, #9f9f9f 10%, #707070 96%, #515151 100%);
+    background-image: linear-gradient(top, #d6d6d6 0%, #9f9f9f 10%, #707070 96%, #515151 100%);
+}
+.shield .darkgray {
+    background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #909090), color-stop(10%, #313131), color-stop(96%, #232323), color-stop(100%, #191919));
+    background-image: -webkit-linear-gradient(top, #909090 0%, #313131 10%, #232323 96%, #191919 100%);
+    background-image: -moz-linear-gradient(top, #909090 0%, #313131 10%, #232323 96%, #191919 100%);
+    background-image: -o-linear-gradient(top, #909090 0%, #313131 10%, #232323 96%, #191919 100%);
+    background-image: linear-gradient(top, #909090 0%, #313131 10%, #232323 96%, #191919 100%);
+}
+.shield .green, .shield .pass {
+    background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #9ded7d), color-stop(10%, #4ad115), color-stop(96%, #31b70e), color-stop(100%, #23630a));
+    background-image: -webkit-linear-gradient(top, #9ded7d 0%, #4ad115 10%, #31b70e 96%, #23630a 100%);
+    background-image: -moz-linear-gradient(top, #9ded7d 0%, #4ad115 10%, #31b70e 96%, #23630a 100%);
+    background-image: -o-linear-gradient(top, #9ded7d 0%, #4ad115 10%, #31b70e 96%, #23630a 100%);
+    background-image: linear-gradient(top, #9ded7d 0%, #4ad115 10%, #31b70e 96%, #23630a 100%);
+}
+.shield .yellowgreen {
+    background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #d1f171), color-stop(10%, #97ca00), color-stop(96%, #6b8f00), color-stop(100%, #4d6700));
+    background-image: -webkit-linear-gradient(top, #d1f171 0%, #97ca00 10%, #6b8f00 96%, #4d6700 100%);
+    background-image: -moz-linear-gradient(top, #d1f171 0%, #97ca00 10%, #6b8f00 96%, #4d6700 100%);
+    background-image: -o-linear-gradient(top, #d1f171 0%, #97ca00 10%, #6b8f00 96%, #4d6700 100%);
+    background-image: linear-gradient(top, #d1f171 0%, #97ca00 10%, #6b8f00 96%, #4d6700 100%);
+}
+.shield .yellow {
+    background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #ffe37f), color-stop(10%, #e0b417), color-stop(96%, #9e7f10), color-stop(100%, #725c0c));
+    background-image: -webkit-linear-gradient(top, #ffe37f 0%, #e0b417 10%, #9e7f10 96%, #725c0c 100%);
+    background-image: -moz-linear-gradient(top, #ffe37f 0%, #e0b417 10%, #9e7f10 96%, #725c0c 100%);
+    background-image: -o-linear-gradient(top, #ffe37f 0%, #e0b417 10%, #9e7f10 96%, #725c0c 100%);
+    background-image: linear-gradient(top, #ffe37f 0%, #e0b417 10%, #9e7f10 96%, #725c0c 100%);
+}
+.shield .red, .shield .fail {
+    background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #ffac9c), color-stop(10%, #e05d44), color-stop(96%, #9e4230), color-stop(100%, #722f22));
+    background-image: -webkit-linear-gradient(top, #ffac9c 0%, #e05d44 10%, #9e4230 96%, #722f22 100%);
+    background-image: -moz-linear-gradient(top, #ffac9c 0%, #e05d44 10%, #9e4230 96%, #722f22 100%);
+    background-image: -o-linear-gradient(top, #ffac9c 0%, #e05d44 10%, #9e4230 96%, #722f22 100%);
+    background-image: linear-gradient(top, #ffac9c 0%, #e05d44 10%, #9e4230 96%, #722f22 100%);
+}

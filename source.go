@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"doc"
 	"fmt"
 	"gnd.la/html"
 	"gnd.la/mux"
@@ -33,9 +34,9 @@ func SourceHandler(ctx *mux.Context) {
 	rel := ctx.IndexValue(0)
 	var path string
 	if strings.HasPrefix(rel, "go") {
-		path = filepath.Join(buildContext().GOROOT, "src", filepath.FromSlash(rel[2:]))
+		path = filepath.Join(doc.Context.GOROOT, "src", filepath.FromSlash(rel[2:]))
 	} else {
-		path = filepath.Join(srcDir, filepath.FromSlash(rel))
+		path = filepath.Join(doc.SourceDir, filepath.FromSlash(rel))
 	}
 	info, err := os.Stat(path)
 	if err != nil {

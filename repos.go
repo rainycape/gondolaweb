@@ -1,6 +1,7 @@
 package main
 
 import (
+	"doc"
 	"gnd.la/log"
 	"gnd.la/util"
 	"io/ioutil"
@@ -48,7 +49,7 @@ func StartUpdatingRepos() {
 
 func UpdateRepos() {
 	for _, v := range Repos() {
-		p := filepath.Join(srcDir, filepath.FromSlash(repoPath(v)))
+		p := filepath.Join(doc.SourceDir, filepath.FromSlash(repoPath(v)))
 		if _, err := os.Stat(p); err == nil {
 			cmd := exec.Command(gitPath, "pull")
 			cmd.Dir = p
