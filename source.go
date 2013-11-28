@@ -34,7 +34,11 @@ var (
 func SourceHandler(ctx *mux.Context) {
 	rel := ctx.IndexValue(0)
 	var path string
-	if strings.IndexByte(rel, '.') < strings.IndexByte(rel, '/') {
+	start := rel
+	if p := strings.IndexByte(rel, '/'); p >= 0 {
+		start = rel[:p]
+	}
+	if strings.IndexByte(start, '.') > 0 {
 		// Non std package
 		path = filepath.Join(doc.SourceDir, filepath.FromSlash(rel))
 	} else {
