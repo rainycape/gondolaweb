@@ -37,6 +37,7 @@ func main() {
 	m.HandleFunc("^/article/$", mux.TemplateHandler("article.html", util.M{"Section": "docs"}))
 	m.HandleNamedFunc("^/doc/src/(.+)", "source", SourceHandler)
 	m.HandleNamedFunc("^/doc/pkg/$", "doc-list", DocListHandler)
+	m.HandleNamedFunc("^/doc/pkg/std/$", "std-doc-list", DocStdListHandler)
 	m.HandleNamedFunc("^/doc/pkg/(.+)", "doc", DocHandler)
 	m.SetTrustXHeaders(true)
 	m.HandleAssets("/static/", STATIC_FILES_PATH)

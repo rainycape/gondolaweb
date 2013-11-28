@@ -45,6 +45,24 @@ func DocListHandler(ctx *mux.Context) {
 	ctx.MustExecute("pkgs.html", data)
 }
 
+func DocStdListHandler(ctx *mux.Context) {
+	pkgs, err := doc.ImportPackages(filepath.Join(doc.Context.GOROOT, "src"))
+	if err != nil {
+		panic(err)
+	}
+	title := "Go Standard Library"
+	groups := []packageGroup{
+		{Title: "Go Standard Library", Packages: pkgs},
+	}
+	data := map[string]interface{}{
+		"HeaderTitle": title,
+		"Subtitle":    title,
+		"Section":     "docs",
+		"Groups":      groups,
+	}
+	ctx.MustExecute("pkgs.html", data)
+}
+
 func DocHandler(ctx *mux.Context) {
 	path := ctx.IndexValue(0)
 	pkg, err := doc.ImportPackage(path)

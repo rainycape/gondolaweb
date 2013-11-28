@@ -165,9 +165,8 @@
     {{ if .Filenames }}
       <h3>Files</h3>
         <ul class="list-inline list-unstyled">
-          {{ $p := .ImportPath }}
           {{ range .Filenames }}
-            <li><a href="{{ reverse "source" (concat $p "/" .) }}">{{ . }}</a></li>
+            <li><a href="{{ $package.ReverseFilename . }}">{{ . }}</a></li>
           {{ end }}
         </ul>
     {{ end }}

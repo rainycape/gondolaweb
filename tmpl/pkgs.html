@@ -4,7 +4,7 @@
 
 {{ define "package" }}
   {{ $p := .ImportPath }}
-  <tr><td><a href="{{ reverse "doc" $p }}">{{ $p }}</a></td><td>{{ .Synopsis }}</td></tr>
+  <tr><td><a href="{{ reverse "doc" .ImportPath }}">{{ .ImportPath }}</a></td><td>{{ .Synopsis }}</td></tr>
   {{ range .Packages }}
       {{ template "package" . }}
   {{ end }}

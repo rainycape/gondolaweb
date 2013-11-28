@@ -5,6 +5,7 @@ import (
 	"doc"
 	"fmt"
 	"gnd.la/html"
+	"gnd.la/log"
 	"gnd.la/mux"
 	"html/template"
 	"io/ioutil"
@@ -33,11 +34,14 @@ var (
 func SourceHandler(ctx *mux.Context) {
 	rel := ctx.IndexValue(0)
 	var path string
-	if strings.HasPrefix(rel, "go") {
-		path = filepath.Join(doc.Context.GOROOT, "src", filepath.FromSlash(rel[2:]))
-	} else {
+	if strings.IndexByte(rel, '.') < strings.IndexByte(rel, '/') {
+		// Non std package
 		path = filepath.Join(doc.SourceDir, filepath.FromSlash(rel))
+	} else {
+		// Std pckage
+		path = filepath.Join(doc.Context.GOROOT, "src", "pkg", filepath.FromSlash(rel))
 	}
+	log.Debugf("Loading source from %s", path)
 	info, err := os.Stat(path)
 	if err != nil {
 		ctx.NotFound("File not found")
