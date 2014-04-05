@@ -27,7 +27,13 @@ func init() {
 	config.MustParse(&Config)
 	a = app.New()
 	a.HandleAssets("/static/", STATIC_FILES_PATH)
+	a.AddTemplateVars(map[string]interface{}{
+		"Repo": "ssh://abra.rm-fr.net/home/fiam/git/gondola.git",
+	})
 	a.SetTrustXHeaders(true)
+
+	// gnd.la handler, used by go get, etc...
+	a.HandleOptions("/", gndlaHandler, &app.Options{Host: "gnd.la"})
 
 	// Site handlers
 	a.Handle("^/$", app.TemplateHandler("main.html", map[string]interface{}{"Section": "home"}))
