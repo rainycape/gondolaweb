@@ -6,6 +6,7 @@ import (
 	"gnd.la/apps/docs"
 	_ "gnd.la/bootstrap"
 	"gnd.la/config"
+	_ "gnd.la/encoding/codec/msgpack"
 	"gnd.la/internal/project"
 	_ "gnd.la/orm/driver/postgres"
 	_ "gnd.la/template/markdown"

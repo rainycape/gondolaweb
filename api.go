@@ -19,16 +19,25 @@ func templateListHandler(ctx *app.Context) (interface{}, error) {
 
 func templateDownloadHandler(ctx *app.Context) {
 	name := ctx.IndexValue(0)
-	for _, v := range templates {
-		if v.Name == name {
-			data, err := v.Data()
-			if err != nil {
-				panic(err)
+	key := "proj-tmpl-" + name
+	c := ctx.Cache()
+	data, _ := c.GetBytes(key)
+	if data == nil {
+		for _, v := range templates {
+			if v.Name == name {
+				var err error
+				data, err = v.Data()
+				if err != nil {
+					panic(err)
+				}
+				break
 			}
-			ctx.Header().Set("Content-Type", "application/x-gzip")
-			ctx.Write(data)
-			return
 		}
+		if data == nil {
+			ctx.NotFound("template not found")
+		}
+		c.SetBytes(key, data, 0)
 	}
-	ctx.NotFound("template not found")
+	ctx.Header().Set("Content-Type", "application/x-gzip")
+	ctx.Write(data)
 }
