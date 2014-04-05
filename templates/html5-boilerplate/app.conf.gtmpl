@@ -1,0 +1,2 @@
+port = {{ .Port }}
+secret = {{ .AppSecret }}

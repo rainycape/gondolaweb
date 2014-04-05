@@ -1,14 +1,13 @@
 {{/*
   extends: base.html
 */}}
-{{ define "main" }}
     <!-- Main jumbotron for a primary marketing message or call to action -->
     <div class="jumbotron">
       <div class="container">
         <div class="marketing-holder col-sm-6">
           <h1>Gondola</h1>
           <p>The web framework for writing faster sites, faster</p>
-          <p><a href="{{ reverse "tutorial" "install" }}" class="btn btn-primary btn-lg" role="button">Get Started &raquo;</a></p>
+          <p><a href="{{ reverse_app_article @Apps.Tutorials "install" }}" class="btn btn-primary btn-lg" role="button">Get Started &raquo;</a></p>
         </div>
         <div class="hidden-xs logo-holder col-sm-6">
           <div id="logo">
@@ -54,4 +53,3 @@
       </div>
 
     </div> <!-- /container -->
-{{ end }}

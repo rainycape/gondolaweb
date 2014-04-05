@@ -1,0 +1,11 @@
+{{/*
+  extends: base.html
+  include: header.html
+*/}}
+{{ define "subtitle" }}{{ template "Docs|Title" }} | {{ end }}
+{{ template "header" (t "Documentation") }}
+<div class="container">
+  <div class="content">
+    {{ app }}
+  </div>
+</div>

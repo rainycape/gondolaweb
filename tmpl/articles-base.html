@@ -1,0 +1,17 @@
+{{/*
+  extends: base.html
+  include: header.html
+*/}}
+{{ define "subtitle" }}{{ .Title }} | {{ end }}
+{{ template "header" .Title }}
+{{/* Make all h1 blocks empty, since we're already showing
+  the h1 with the title in the header */}}
+{{ define "Articles|ArticleTitle" }}{{ end }}
+{{ define "Articles|ArticleListTitle" }}{{ end }}
+{{ define "Tutorials|ArticleTitle" }}{{ end }}
+{{ define "Tutorials|ArticleListTitle" }}{{ end }}
+<div class="container">
+  <div class="content">
+    {{ app }}
+  </div>
+</div>
