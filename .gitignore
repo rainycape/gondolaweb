@@ -1,2 +1,4 @@
 /gondolaweb
-/static/css/style.*.css
+*.gen.*
+# Avoid commiting the secrets to the repo by accident
+app.conf
