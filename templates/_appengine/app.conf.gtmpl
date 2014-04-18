@@ -1,0 +1,12 @@
+# This is the configuration file used while running your GAE
+# application on Google's servers.
+secret = {{ .AppSecret }}
+# Comment the following line to disable caching.
+cache = memcache://
+database = datastore://
+blobstore = gce://
+# Uncomment the following line to use Google Cloud SQL as the ORM
+# backend. See https://developers.google.com/cloud-sql/ for further
+# details. On development, you should use a local MySQL server, see
+# dev.conf for its syntax.
+database = mysql://user@cloudsql(project-id:instance-name)/dbname

@@ -1,0 +1,14 @@
+# This is the configuration file used while developing your GAE
+# application.
+secret = {{ .DevSecret }}
+cache = memcache://
+database = datastore://
+blobstore = gce://
+# Uncomment the following line to use MySQL as the ORM
+# backend. On production, you should use Google Cloud SQL.
+# See https://developers.google.com/cloud-sql/ and app.conf
+# for details.
+# database = mysql://user:password@tcp(host:3306)/dbname
+log_debug = true
+app_debug = true
+template_debug = true
