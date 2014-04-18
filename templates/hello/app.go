@@ -17,7 +17,6 @@ var Config struct {
 func init() {
 	// Initialize the configuration and the App in init, so
 	// it's configured correctly when running tests.
-
 	config.MustParse(&Config)
 	App = app.New()
 	// Make the config available to templates as @Config
@@ -32,14 +31,4 @@ func init() {
 
 	// Site handlers
 	App.HandleNamed("^/$", MainHandler, "main")
-}
-
-func MainHandler(ctx *app.Context) {
-	ctx.WriteString("Hello world!")
-}
-
-func main() {
-	// Start listening on main(), so the app does not start
-	// listening when running tests.
-	App.MustListenAndServe()
 }

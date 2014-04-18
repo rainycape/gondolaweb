@@ -5,7 +5,6 @@ import (
 	"gnd.la/config"
 	"gnd.la/template/assets"
 	"gnd.la/util/pathutil"
-	"net/http"
 )
 
 var (
@@ -45,24 +44,4 @@ func init() {
 
 	// Error handler, for 404
 	App.SetErrorHandler(ErrorHandler)
-}
-
-func MainHandler(ctx *app.Context) {
-	ctx.MustExecute("main.html", nil)
-}
-
-func ErrorHandler(ctx *app.Context, msg string, code int) bool {
-	// Only send the 404 page if the error is a 404
-	if code == http.StatusNotFound {
-		ctx.MustExecute("404.html", nil)
-		return true
-	}
-	// Otherwise, let the Gondola error processing take care of it
-	return false
-}
-
-func main() {
-	// Start listening on main(), so the app does not start
-	// listening when running tests.
-	App.MustListenAndServe()
 }

@@ -1,6 +1,7 @@
 package main
 
 import (
+	_ "gnd.la/admin"
 	"gnd.la/app"
 	"gnd.la/apps/articles"
 	"gnd.la/apps/docs"

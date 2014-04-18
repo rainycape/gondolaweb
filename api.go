@@ -20,13 +20,18 @@ func templateListHandler(ctx *app.Context) (interface{}, error) {
 func templateDownloadHandler(ctx *app.Context) {
 	name := ctx.IndexValue(0)
 	key := "proj-tmpl-" + name
+	var gae bool
+	if ctx.FormValue("gae") != "" {
+		gae = true
+		key += "-gae"
+	}
 	c := ctx.Cache()
 	data, _ := c.GetBytes(key)
 	if data == nil {
 		for _, v := range templates {
 			if v.Name == name {
 				var err error
-				data, err = v.Data()
+				data, err = v.Data(gae)
 				if err != nil {
 					panic(err)
 				}
