@@ -29,6 +29,7 @@
           </button>
           <a class="navbar-brand" href="/">Gondola</a>
         </div>
+        {{ block "menus" }}
         <div class="navbar-collapse collapse">
           <ul class="nav navbar-nav navbar-right">
             <li{{ if eq .Section "home" }} class="active"{{ end }}><a href="/">Home</a></li> 
@@ -44,6 +45,7 @@
             <li><a href="{{ @Repo }}">Source</a></li>
           </ul>
         </div><!--/.navbar-collapse -->
+        {{ end }}
       </div>
     </div>
     {{ extend }}

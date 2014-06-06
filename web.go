@@ -4,12 +4,13 @@ import (
 	"gnd.la/app"
 	"gnd.la/apps/docs"
 	"gnd.la/apps/docs/doc"
-	"gnd.la/util/urlutil"
+	"gnd.la/net/urlutil"
 	"path"
 )
 
 const (
-	gondolaURL = "http://www.gondolaweb.com"
+	//gondolaURL = "http://www.gondolaweb.com"
+	gondolaURL = "ssh://abra.rm-fr.net/home/fiam/git/gondola.git"
 )
 
 func gndlaHandler(ctx *app.Context) {

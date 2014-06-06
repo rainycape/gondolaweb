@@ -1,0 +1,7 @@
+# Uncomment the following lines if you're using
+# gnd.la/tasks.
+
+#cron:
+#- description: run scheduled Gondola tasks
+#  url: /gondola-run-tasks
+#  schedule: every 1 mins

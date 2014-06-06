@@ -88,4 +88,4 @@ right.
 ## Done!
 
 Now that your Gondola installation is ready, continue
-with the [Hello World]({{ reverse_article @Ctx "hello-world" }}) tutorial.
+with the [Hello World]({{ reverse_article "hello-world" }}) tutorial.

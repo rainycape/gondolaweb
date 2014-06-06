@@ -13,6 +13,10 @@ import (
 	//_ "gnd.la/orm/driver/mysql"
 )
 
+var (
+	wg sync.WaitGroup
+)
+
 func _app_engine_app_init() {
 	// Make sure App is initialized before the rest
 	// of this function runs.
@@ -23,8 +27,16 @@ func _app_engine_app_init() {
 		panic(err)
 	}
 	http.Handle("/", App)
+	wg.Done()
+}
+
+// Only executed on the development server. Required for
+// precompiling assets.
+func main() {
+	wg.Wait()
 }
 
 func init() {
+	wg.Add(1)
 	go _app_engine_app_init()
 }

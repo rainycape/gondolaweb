@@ -12,14 +12,15 @@ var (
 )
 
 var Config struct {
-	config.Config
+	// Include your settings here
 }
 
 func init() {
 	// Initialize the configuration and the App in init, so
 	// it's configured correctly when running tests.
+	config.Register(&Config)
+	config.MustParse()
 
-	config.MustParse(&Config)
 	App = app.New()
 	// Make the config available to templates as @Config
 	App.AddTemplateVars(map[string]interface{}{
@@ -31,7 +32,7 @@ func init() {
 	// You might probably want the following if you're
 	// deploying your app behind an upstream proxy.
 	//
-	// a.SetTrustXHeaders(true)
+	// App.SetTrustXHeaders(true)
 
 	// Site handlers
 	App.HandleNamed("^/$", MainHandler, "main")
