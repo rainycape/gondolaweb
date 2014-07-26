@@ -89,3 +89,10 @@ right.
 
 Now that your Gondola installation is ready, continue
 with the [Hello World]({{ reverse_article "hello-world" }}) tutorial.
+
+
+[title] = Installing Gondola
+[synopsis] = Read this tutorial after installing Gondola.
+[updated] = 2014-07-26 06:27:40
+[updated] = 2014-07-26 16:43:30
+[priority] = 1

@@ -45,13 +45,17 @@ func init() {
 	// articles app, clone it to load it twice: once
 	// for the articles and once for the tutorials
 	tutorialsApp := articles.App.Clone()
+	if _, err := articles.LoadDir(tutorialsApp, pathutil.Relative("tutorials")); err != nil {
+		panic(err)
+	}
 	tutorialsApp.SetName("Tutorials")
 	App.Include("/tutorials/", tutorialsApp, "articles-base.html")
-	articles.MustLoad(tutorialsApp, pathutil.Relative("tutorials"))
 
 	articlesApp := articles.App.Clone()
+	if _, err := articles.LoadDir(articlesApp, pathutil.Relative("articles")); err != nil {
+		panic(err)
+	}
 	App.Include("/articles/", articlesApp, "articles-base.html")
-	articles.MustLoad(articlesApp, pathutil.Relative("articles"))
 
 	// API
 	App.Handle("^/api/v1/templates$", app.JSONHandler(templateListHandler))

@@ -118,7 +118,7 @@ First, you can obtain the final code of this tutorial, with comments and a few m
 gondola new -template=hello hello
 ```
 
-If you're interested in running your app in App Engine, it's recommended that you read the [Gondola on App Engine]({{ reverse_article "gondola-on-app-engine" }}) document before following the rest of the tutorials.
+If you're interested in running your app in App Engine, it's recommended that you read the [Gondola on App Engine]({{ reverse_article "app-engine" }}) document before following the rest of the tutorials.
 
 So you've already written your first Gondola application. Easy, wasn't it? Continue to the next tutorial: [Using Gondola templates]({{ reverse_article "gondola-templates" }}).
 
@@ -126,3 +126,9 @@ So you've already written your first Gondola application. Easy, wasn't it? Conti
 [2]: http://gondolaweb.com/doc/pkg/gnd.la/app#type-Handler
 [3]: http://gondolaweb.com/doc/pkg/gnd.la/config
 [4]: http://gondolaweb.com/doc/pkg/regexp
+
+
+[title] = Hello World with Gondola
+[slug] = hello-world
+[synopsis] = This article includes instruction for installing Gondola from scratch.
+[priority] = 2
