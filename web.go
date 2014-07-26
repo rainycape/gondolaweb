@@ -1,11 +1,11 @@
 package main
 
 import (
+	"path"
+
 	"gnd.la/app"
 	"gnd.la/apps/docs"
-	"gnd.la/apps/docs/doc"
 	"gnd.la/net/urlutil"
-	"path"
 )
 
 const (
@@ -21,7 +21,7 @@ func gndlaHandler(ctx *app.Context) {
 	// Check if the request path is a pkg name
 	var p string
 	pkg := path.Join("gnd.la", ctx.R.URL.Path)
-	if _, err := doc.Context.Import(pkg, "", 0); err == nil {
+	if _, err := docs.DefaultContext.Import(pkg, "", 0); err == nil {
 		p = ctx.MustReverse(docs.PackageHandlerName, pkg)
 	}
 	redir, err := urlutil.Join(gondolaURL, p)
