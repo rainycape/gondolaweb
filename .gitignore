@@ -1,4 +1,5 @@
 /gondolaweb
+/tmp
 *.gen.*
 # Avoid commiting the secrets to the repo by accident
 app.conf

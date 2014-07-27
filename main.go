@@ -1,6 +1,8 @@
 package main
 
 import (
+	"time"
+
 	_ "gnd.la/admin"
 	"gnd.la/app"
 	"gnd.la/apps/articles"
@@ -36,11 +38,18 @@ func init() {
 	App.Handle("^/$", app.TemplateHandler("main.html", map[string]interface{}{"Section": "home"}))
 
 	// docs app
+	docs.DefaultContext.GOROOT = goRoot
+	docs.DefaultContext.GOPATH = goPath
 	App.Include("/doc/", docs.App, "docs-base.html")
 	docs.Groups = []*docs.Group{
 		{"Gondola Packages", []string{"gnd.la/"}},
 	}
-	//docs.StartUpdatingPackages(time.Minute * 30)
+	// Wait 10 seconds so the app starts and go get
+	// can retrieve gnd.la, since this same app is
+	// serving that content.
+	time.AfterFunc(10*time.Second, func() {
+		docs.StartUpdatingPackages(time.Minute * 10)
+	})
 
 	// articles app, clone it to load it twice: once
 	// for the articles and once for the tutorials
