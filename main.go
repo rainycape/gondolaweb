@@ -27,7 +27,7 @@ func init() {
 	App = app.New()
 	App.HandleAssets("/static/", STATIC_FILES_PATH)
 	App.AddTemplateVars(map[string]interface{}{
-		"Repo": "ssh://abra.rm-fr.net/home/fiam/git/gondola.git",
+		"Repo": "http://github.com/rainycape/gondola",
 	})
 	App.SetTrustXHeaders(true)
 
