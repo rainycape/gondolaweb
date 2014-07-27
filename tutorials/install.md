@@ -56,19 +56,10 @@ Windows press Win+R, type cmd and press Enter) and type
 the following:
 
 ```sh
-go get -v gnd.la/...
+go get -v gnd.la/cmd/gondola
 ```
 
-Please note that this will take a few minutes to complete and will download several packages. Some
-non-essential packages might fail to install due to required depedencies, but that's usually not
-a problem. Now type the following command:
-
-```sh
-go install gnd.la/cmd/gondola
-```
-
-If it completes without errors, Gondola is most likely correctly installed. Check the last step
-in this tutorial to make sure.
+Please note that this will take a few minutes to complete and will download several packages.
 
 ## Verify Gondola was installed
 
