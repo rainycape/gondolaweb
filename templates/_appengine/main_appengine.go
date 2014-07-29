@@ -4,11 +4,12 @@ package main
 
 import (
 	"net/http"
+	"sync"
 	"time"
 
 	_ "gnd.la/admin"                 // required for make-assets command
+	_ "gnd.la/blobstore/driver/gcs"  // enable Google Could Storage blobstore driver
 	_ "gnd.la/cache/driver/memcache" // enable memcached cache driver
-	_ "gnd.la/orm/blobstore/gcs"     // enable Google Could Storage blobstore driver
 	// Uncomment the following line to use Google Cloud SQL
 	//_ "gnd.la/orm/driver/mysql"
 )
