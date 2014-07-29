@@ -43,6 +43,35 @@ lists all its options and subcommands.
 
 
 
+- ## build
+
+    Build packages
+
+    Usage: ```gondola build [package-1] [package-2] ... [package-n]```
+
+    gondola build is a wrapper around go build\.
+    
+    Before building a package, gondola build checks that all its dependencies
+    exist and automatically downloads the missing ones\.
+    
+    The \-go option can be used to set the go command that will be called\. All the
+    remaining options are passed to go build unchanged\.
+
+    Flags:
+
+     - **go** *\(string\)*: Command to run the go tool *default: go*
+     - **race** *\(bool\)*: Enable data race detection *default: false*
+     - **x** *\(bool\)*: Print the commands *default: false*
+     - **v** *\(bool\)*: Print the names of packages as they are compiled *default: false*
+     - **ccflags** *\(string\)*: Arguments to pass on each 5c, 6c, or 8c compiler invocation
+     - **compiler** *\(string\)*: Name of compiler to use, as in runtime\.Compiler \(gccgo or gc\)
+     - **gccgoflags** *\(string\)*: Arguments to pass on each gccgo compiler/linker invocation
+     - **gcflags** *\(string\)*: Arguments to pass on each 5g, 6g, or 8g compiler invocation
+     - **ldflags** *\(string\)*: Arguments to pass on each 5l, 6l, or 8l linker invocation
+     - **tags** *\(string\)*: A list of build tags to consider satisfied during the build
+
+
+
 - ## clean
 
     Cleans any Gondola packages which use conditional compilation \- DO THIS BEFORE BUILDING A BINARY FOR DEPLOYMENT \- see golang\.org/issue/3172
@@ -180,5 +209,5 @@ lists all its options and subcommands.
 
 
 [title] = The Gondola command line tool
-[synopsis] = Help for the gondola command
+[synopsis] = Help for the gondola command.
 [updated] = 2014-07-27
