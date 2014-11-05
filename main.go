@@ -3,11 +3,11 @@ package main
 import (
 	"time"
 
-	_ "gnd.la/admin"
 	"gnd.la/app"
 	"gnd.la/apps/articles"
 	"gnd.la/apps/docs"
 	_ "gnd.la/bootstrap"
+	_ "gnd.la/commands"
 	"gnd.la/config"
 	_ "gnd.la/encoding/codec/msgpack"
 	"gnd.la/internal/project"
@@ -32,7 +32,7 @@ func init() {
 	App.SetTrustXHeaders(true)
 
 	// gnd.la handler, used by go get, etc...
-	App.HandleOptions("/", gndlaHandler, &app.Options{Host: "gnd.la"})
+	App.HandleOptions("/", gndlaHandler, &app.HandlerOptions{Host: "gnd.la"})
 
 	// Site handlers
 	App.Handle("^/$", app.TemplateHandler("main.html", map[string]interface{}{"Section": "home"}))
