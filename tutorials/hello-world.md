@@ -120,7 +120,7 @@ gondola new -template=hello hello
 
 If you're interested in running your app in App Engine, it's recommended that you read the [Gondola on App Engine]({{ reverse_article "app-engine" }}) document before following the rest of the tutorials.
 
-So you've already written your first Gondola application. Easy, wasn't it? Continue to the next tutorial: [Using Gondola templates]({{ reverse_article "gondola-templates" }}).
+So you've already written your first Gondola application. Easy, wasn't it? Continue to the next tutorial: [Using Gondola templates]({{ reverse_article "templates-tutorial" }}).
 
 [1]: http://gondolaweb.com/doc/pkg/net/http#type-ResponseWriter
 [2]: http://gondolaweb.com/doc/pkg/gnd.la/app#type-Handler
