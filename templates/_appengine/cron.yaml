@@ -1,5 +1,7 @@
 # Uncomment the following lines if you're using
-# gnd.la/tasks.
+# gnd.la/tasks. Otherwise, delete this file, since
+# App Engine now returns an error when the cron file
+# is empty.
 
 #cron:
 #- description: run scheduled Gondola tasks
