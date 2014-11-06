@@ -9,8 +9,7 @@ import (
 )
 
 const (
-	//gondolaURL = "http://www.gondolaweb.com"
-	gondolaURL = "ssh://abra.rm-fr.net/home/fiam/git/gondola.git"
+	gondolaURL = "http://www.gondolaweb.com"
 )
 
 func gndlaHandler(ctx *app.Context) {
