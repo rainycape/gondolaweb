@@ -9,4 +9,4 @@ blobstore = gce://
 # backend. See https://developers.google.com/cloud-sql/ for further
 # details. On development, you should use a local MySQL server, see
 # dev.conf for its syntax.
-database = mysql://user@cloudsql(project-id:instance-name)/dbname
+# database = mysql://user@cloudsql(project-id:instance-name)/dbname
