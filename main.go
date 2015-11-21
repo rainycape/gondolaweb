@@ -6,10 +6,11 @@ import (
 	"gnd.la/app"
 	"gnd.la/apps/articles"
 	"gnd.la/apps/docs"
-	_ "gnd.la/bootstrap"
 	_ "gnd.la/commands"
 	"gnd.la/config"
 	_ "gnd.la/encoding/codec/msgpack"
+	_ "gnd.la/frontend/bootstrap"
+	_ "gnd.la/frontend/fontawesome"
 	"gnd.la/internal/project"
 	_ "gnd.la/orm/driver/postgres"
 	_ "gnd.la/template/markdown"
@@ -31,7 +32,7 @@ func init() {
 	App.SetTrustXHeaders(true)
 
 	// gnd.la handler, used by go get, etc...
-	App.HandleOptions("/", gndlaHandler, &app.HandlerOptions{Host: "gnd.la"})
+	App.Handle("/", gndlaHandler, app.HostHandler("gnd.la"))
 
 	// Site handlers
 	App.Handle("^/$", app.TemplateHandler("main.html", map[string]interface{}{"Section": "home"}))
@@ -67,7 +68,8 @@ func init() {
 
 	// API
 	App.Handle("^/api/v1/templates$", app.JSONHandler(templateListHandler))
-	App.HandleNamed("^/api/v1/template/download/([\\w\\-_]+)\\-v(\\d+)\\.tar\\.gz$", templateDownloadHandler, templateDownloadHandlerName)
+	App.Handle("^/api/v1/template/download/([\\w\\-_]+)\\-v(\\d+)\\.tar\\.gz$",
+		templateDownloadHandler, app.NamedHandler(templateDownloadHandlerName))
 
 	// Load project templates
 	var err error
