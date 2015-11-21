@@ -59,7 +59,7 @@ func Deploy(s *wb.Session) {
 
 func init() {
 	wb.DefaultJob = "Deploy"
-	wb.SetDefaultHosts("milos.rainycape.com")
+	wb.SetDefaultHosts("carniciega.rainycape.com")
 	dir, err := os.Getwd()
 	if err != nil {
 		panic(err)
