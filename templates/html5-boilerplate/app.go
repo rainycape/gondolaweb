@@ -41,7 +41,7 @@ func init() {
 	// App.SetTrustXHeaders(true)
 
 	// Site handlers
-	App.HandleNamed("^/$", MainHandler, "main")
+	App.Handle("^/$", MainHandler, app.NamedHandler("main"))
 
 	// Error handler, for 404
 	App.SetErrorHandler(ErrorHandler)

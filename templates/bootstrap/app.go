@@ -2,8 +2,8 @@ package main
 
 import (
 	"gnd.la/app"
-	_ "gnd.la/bootstrap"
 	"gnd.la/config"
+	_ "gnd.la/frontend/bootstrap"
 	"gnd.la/util/pathutil"
 )
 
@@ -35,7 +35,7 @@ func init() {
 	// App.SetTrustXHeaders(true)
 
 	// Site handlers
-	App.HandleNamed("^/$", MainHandler, "main")
+	App.Handle("^/$", MainHandler, app.NamedHandler("main"))
 
 	// Error handler, for 404
 	App.SetErrorHandler(ErrorHandler)
